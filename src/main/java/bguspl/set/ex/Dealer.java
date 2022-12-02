@@ -37,11 +37,17 @@ public class Dealer implements Runnable {
      */
     private long reshuffleTime = Long.MAX_VALUE;
 
+    private long milliseconds;
+
+    private final long MINUTE = 5000;
+
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
         this.table = table;
         this.players = players;
         deck = IntStream.range(0, env.config.deckSize).boxed().collect(Collectors.toList());
+        reshuffleTime = System.currentTimeMillis() + MINUTE;
+        milliseconds = MINUTE;
     }
 
     /**
@@ -50,6 +56,8 @@ public class Dealer implements Runnable {
     @Override
     public void run() {
         System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
+        //create player threads
+        //start player threads
         while (!shouldFinish()) {
             placeCardsOnTable();
             timerLoop();
@@ -64,9 +72,11 @@ public class Dealer implements Runnable {
      * The inner loop of the dealer thread that runs as long as the countdown did not time out.
      */
     private void timerLoop() {
-        while (!terminate && System.currentTimeMillis() < reshuffleTime) {
+        while (!terminate && System.currentTimeMillis() < reshuffleTime + 1000) { // set reshuffleTime = 60sec
+            long lastSecond = System.currentTimeMillis();
             sleepUntilWokenOrTimeout();
-            updateTimerDisplay(false);
+            if( (System.currentTimeMillis() - lastSecond)/1000 == 1) //checks if 1 second passed, updates only if it did
+                updateTimerDisplay(false);
             removeCardsFromTable();
             placeCardsOnTable();
         }
@@ -77,6 +87,8 @@ public class Dealer implements Runnable {
      */
     public void terminate() {
         // TODO implement
+        terminate = true;
+        //for every player: player.terminate = true;
     }
 
     /**
@@ -100,6 +112,12 @@ public class Dealer implements Runnable {
      */
     private void placeCardsOnTable() {
         // TODO implement
+        /*
+         * reshuffle
+         *  while(deck >= 0 & numOfCardsToPlace >0)
+         *  insert to one of the empty slots the last card in the deck
+         *  table.placeCard(int card, int slot)
+         */
     }
 
     /**
@@ -107,6 +125,12 @@ public class Dealer implements Runnable {
      */
     private void sleepUntilWokenOrTimeout() {
         // TODO implement
+        try {
+            Thread.currentThread().sleep(1000);
+        } catch(InterruptedException ex){
+            //handle interrput (check set...)
+            System.out.println("info: got interrupted"); //remove latar
+        }
     }
 
     /**
@@ -114,6 +138,20 @@ public class Dealer implements Runnable {
      */
     private void updateTimerDisplay(boolean reset) {
         // TODO implement
+        if(!reset) {
+            // System.out.println(milliseconds);
+            // env.ui.setCountdown(milliseconds, false);
+            if(milliseconds >= 0) {
+                env.ui.setCountdown(milliseconds, false);
+                System.out.println(milliseconds);
+
+                milliseconds -= 1000;
+            } else {
+                reshuffleTime = System.currentTimeMillis() + MINUTE;
+                milliseconds = MINUTE;
+            }
+
+        }
     }
 
     /**
@@ -121,6 +159,8 @@ public class Dealer implements Runnable {
      */
     private void removeAllCardsFromTable() {
         // TODO implement
+        //remove from table - insert back to deck
+        //
     }
 
     /**

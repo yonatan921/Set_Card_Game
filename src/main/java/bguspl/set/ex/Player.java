@@ -50,6 +50,8 @@ public class Player implements Runnable {
      */
     private int score;
 
+    //private queue (capacity = 3) public function of push,pop,get size
+
     /**
      * The class constructor.
      *
@@ -77,6 +79,12 @@ public class Player implements Runnable {
 
         while (!terminate) {
             // TODO implement main player loop
+            /*
+             * if(table.countCards < rows*columns(=12))
+             *  wait until = 12
+             * else
+             *  wait until key press
+             */
         }
         if (!human) try { aiThread.join(); } catch (InterruptedException ignored) {}
         System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
