@@ -76,9 +76,12 @@ public class Dealer implements Runnable {
     private void timerLoop() {
         while (!terminate && System.currentTimeMillis() < reshuffleTime + 1500) { // set reshuffleTime = 60sec
             long lastSecond = System.currentTimeMillis();
-            sleepUntilWokenOrTimeout();
-            if( (System.currentTimeMillis() - lastSecond)/1000 == 1) //checks if 1 second passed, updates only if it did
+            if(milliseconds != MINUTE) {
+                sleepUntilWokenOrTimeout();
+            }
+            if(milliseconds == MINUTE || (System.currentTimeMillis() - lastSecond)/1000 == 1) //checks if 1 second passed, updates only if it did
                 updateTimerDisplay(false);
+            if(milliseconds < 0) {break;}
             removeCardsFromTable();
             placeCardsOnTable();
         }
@@ -177,7 +180,16 @@ public class Dealer implements Runnable {
     private void removeAllCardsFromTable() {
         // TODO implement
         //remove from table - insert back to deck
-        //
+        //MAGIC NUMBER - 11
+        List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
+        Collections.shuffle(li);
+        for(int i = 0; i < li.size(); i++) {
+            table.removeCard(li.get(i));
+            try {
+                Thread.currentThread().sleep(200);
+            } catch(InterruptedException ex) {}
+        }
+        
     }
 
     /**
