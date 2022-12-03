@@ -2,6 +2,8 @@ package bguspl.set.ex;
 
 import bguspl.set.Env;
 
+import java.lang.ProcessBuilder.Redirect.Type;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -72,7 +74,7 @@ public class Dealer implements Runnable {
      * The inner loop of the dealer thread that runs as long as the countdown did not time out.
      */
     private void timerLoop() {
-        while (!terminate && System.currentTimeMillis() < reshuffleTime + 1000) { // set reshuffleTime = 60sec
+        while (!terminate && System.currentTimeMillis() < reshuffleTime + 1500) { // set reshuffleTime = 60sec
             long lastSecond = System.currentTimeMillis();
             sleepUntilWokenOrTimeout();
             if( (System.currentTimeMillis() - lastSecond)/1000 == 1) //checks if 1 second passed, updates only if it did
@@ -114,10 +116,29 @@ public class Dealer implements Runnable {
         // TODO implement
         /*
          * reshuffle
-         *  while(deck >= 0 & numOfCardsToPlace >0)
+         *  while(deck > 0 & numOfCardsToPlace >0)
          *  insert to one of the empty slots the last card in the deck
          *  table.placeCard(int card, int slot)
          */
+
+        Collections.shuffle(deck);
+        Integer[] slotToCard = table.getSlotToCard();
+        //MAGIC NUMBER - 11
+        List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
+        Collections.shuffle(li);
+        for(int slotNum = 0; slotNum < li.size() && deck.size() > 0; slotNum++) {
+            if(slotToCard[li.get(slotNum)] == null) {
+                //remove last card from deck
+                Integer cardNum = deck.remove(deck.size() - 1);
+                // table.placeCard(int card,int slot)
+                table.placeCard(cardNum, li.get(slotNum));
+                try{
+                    //MAGIC NUMBER - 200
+                    Thread.currentThread().sleep(200);
+                } catch(InterruptedException ex) {}
+            }
+        }
+        reshuffleTime = System.currentTimeMillis() + MINUTE;
     }
 
     /**
@@ -139,18 +160,14 @@ public class Dealer implements Runnable {
     private void updateTimerDisplay(boolean reset) {
         // TODO implement
         if(!reset) {
-            // System.out.println(milliseconds);
-            // env.ui.setCountdown(milliseconds, false);
             if(milliseconds >= 0) {
                 env.ui.setCountdown(milliseconds, false);
-                System.out.println(milliseconds);
 
                 milliseconds -= 1000;
             } else {
                 reshuffleTime = System.currentTimeMillis() + MINUTE;
                 milliseconds = MINUTE;
             }
-
         }
     }
 

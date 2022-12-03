@@ -53,6 +53,10 @@ public class Table {
         this(env, new Integer[env.config.tableSize], new Integer[env.config.deckSize]);
     }
 
+    public Integer[] getSlotToCard() {
+        return slotToCard;
+    }
+
     /**
      * This method prints all possible legal sets of cards that are currently on the table.
      */
@@ -95,7 +99,7 @@ public class Table {
         slotToCard[slot] = card;
 
         // TODO implement
-        //env.ui.placeCard(card,slot);
+        env.ui.placeCard(card,slot);
     }
 
     /**
