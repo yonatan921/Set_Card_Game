@@ -32,6 +32,7 @@ public class WindowManager implements WindowListener {
 
     @Override
     public void windowClosing(WindowEvent e) {
+        
         dealer.terminate();
         try { mainThread.join(); } catch (InterruptedException ignored) {}
         System.out.println("Info: Thanks for playing... it was fun!");

@@ -2,11 +2,14 @@ package bguspl.set.ex;
 
 import bguspl.set.Env;
 
+import java.io.InterruptedIOException;
 import java.lang.ProcessBuilder.Redirect.Type;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import javax.naming.InterruptedNamingException;
 
 /**
  * This class manages the dealer's threads and data
@@ -43,6 +46,8 @@ public class Dealer implements Runnable {
 
     private final long MINUTE = 5000;
 
+    private Thread dealerThread;
+
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
         this.table = table;
@@ -57,18 +62,25 @@ public class Dealer implements Runnable {
      */
     @Override
     public void run() {
+        dealerThread = Thread.currentThread();
         System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
         //create player threads
         //start player threads
+        
         while (!shouldFinish()) {
             placeCardsOnTable();
             timerLoop();
+            System.out.println("1");
             updateTimerDisplay(false);
+            System.out.println("2");
             removeAllCardsFromTable();
+            System.out.println("3");
         }
         announceWinners();
+               
         System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
-    }
+    
+        }
 
     /**
      * The inner loop of the dealer thread that runs as long as the countdown did not time out.
@@ -84,6 +96,7 @@ public class Dealer implements Runnable {
             if(milliseconds < 0) {break;}
             removeCardsFromTable();
             placeCardsOnTable();
+            System.out.println("whoop");
         }
     }
 
@@ -92,6 +105,7 @@ public class Dealer implements Runnable {
      */
     public void terminate() {
         // TODO implement
+        //interrput!
         terminate = true;
         //for every player: player.terminate = true;
     }
@@ -178,18 +192,20 @@ public class Dealer implements Runnable {
      * Returns all the cards from the table to the deck.
      */
     private void removeAllCardsFromTable() {
+        if(!terminate) {
         // TODO implement
         //remove from table - insert back to deck
         //MAGIC NUMBER - 11
-        List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
-        Collections.shuffle(li);
-        for(int i = 0; i < li.size(); i++) {
-            table.removeCard(li.get(i));
-            try {
-                Thread.currentThread().sleep(200);
-            } catch(InterruptedException ex) {}
+            List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
+            Collections.shuffle(li);
+            for(int i = 0; i < li.size(); i++) {
+                deck.add(table.getCardInSlot(li.get(i)));
+                table.removeCard(li.get(i));
+                try {
+                    Thread.currentThread().sleep(200);
+                } catch(InterruptedException ex) {}
+            }
         }
-        
     }
 
     /**

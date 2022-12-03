@@ -57,6 +57,10 @@ public class Table {
         return slotToCard;
     }
 
+    public Integer getCardInSlot(int slot) {
+        return slotToCard[slot];
+    }
+
     /**
      * This method prints all possible legal sets of cards that are currently on the table.
      */
