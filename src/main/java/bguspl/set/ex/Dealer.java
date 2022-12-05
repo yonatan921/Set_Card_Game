@@ -6,6 +6,7 @@ import java.io.InterruptedIOException;
 import java.lang.ProcessBuilder.Redirect.Type;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -48,6 +49,8 @@ public class Dealer implements Runnable {
 
     private Thread dealerThread;
 
+    private Semaphore lock = new Semaphore(1, true);
+
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
         this.table = table;
@@ -64,17 +67,16 @@ public class Dealer implements Runnable {
     public void run() {
         dealerThread = Thread.currentThread();
         System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
-        //create player threads
-        //start player threads
+        for (Player player : players) {
+            Thread pThread = new Thread(player, "player" + player.getId());
+            pThread.start();
+        }
         
         while (!shouldFinish()) {
             placeCardsOnTable();
             timerLoop();
-            System.out.println("1");
             updateTimerDisplay(false);
-            System.out.println("2");
             removeAllCardsFromTable();
-            System.out.println("3");
         }
         announceWinners();
                
@@ -88,6 +90,7 @@ public class Dealer implements Runnable {
     private void timerLoop() {
         while (!terminate && System.currentTimeMillis() < reshuffleTime + 1500) { // set reshuffleTime = 60sec
             long lastSecond = System.currentTimeMillis();
+            //IMPROVE TIMER
             if(milliseconds != MINUTE) {
                 sleepUntilWokenOrTimeout();
             }
@@ -96,7 +99,6 @@ public class Dealer implements Runnable {
             if(milliseconds < 0) {break;}
             removeCardsFromTable();
             placeCardsOnTable();
-            System.out.println("whoop");
         }
     }
 
@@ -107,6 +109,9 @@ public class Dealer implements Runnable {
         // TODO implement
         //interrput!
         terminate = true;
+        for(Player p : players) {
+            p.terminate();
+        }
         //for every player: player.terminate = true;
     }
 
@@ -151,7 +156,7 @@ public class Dealer implements Runnable {
                 table.placeCard(cardNum, li.get(slotNum));
                 try{
                     //MAGIC NUMBER - 200
-                    Thread.currentThread().sleep(200);
+                    Thread.currentThread().sleep(env.config.tableDelayMillis);
                 } catch(InterruptedException ex) {}
             }
         }
@@ -202,7 +207,7 @@ public class Dealer implements Runnable {
                 deck.add(table.getCardInSlot(li.get(i)));
                 table.removeCard(li.get(i));
                 try {
-                    Thread.currentThread().sleep(200);
+                    Thread.currentThread().sleep(env.config.tableDelayMillis);
                 } catch(InterruptedException ex) {}
             }
         }
@@ -213,5 +218,17 @@ public class Dealer implements Runnable {
      */
     private void announceWinners() {
         // TODO implement
+    }
+
+    public void submitedSet(int playerIdSubmitted) {
+        boolean acquired = false;
+        try {
+            lock.acquire();
+            acquired = true;
+        } catch(InterruptedException ignored) {}
+        if(acquired) {
+            System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
+            lock.release();
+        }
     }
 }

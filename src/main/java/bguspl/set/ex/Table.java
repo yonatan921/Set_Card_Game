@@ -29,6 +29,7 @@ public class Table {
      */
     protected final Integer[] cardToSlot; // slot per card (if any)
 
+    private boolean playersTokens[][];
     /**
      * Constructor for testing.
      *
@@ -41,8 +42,8 @@ public class Table {
         this.env = env;
         this.slotToCard = slotToCard;
         this.cardToSlot = cardToSlot;
+        playersTokens = new boolean[env.config.players][env.config.rows*env.config.columns];
     }
-
     /**
      * Constructor for actual usage.
      *
@@ -129,7 +130,8 @@ public class Table {
      */
     public void placeToken(int player, int slot) {
         // TODO implement
-        
+        playersTokens[player][slot] = true;
+        env.ui.placeToken(player, slot);
     }
 
     /**
@@ -140,7 +142,10 @@ public class Table {
      */
     public boolean removeToken(int player, int slot) {
         // TODO implement
-        //
+        playersTokens[player][slot] = false;
+        env.ui.removeToken(player, slot);
         return false;
     }
+
+    public boolean getPlayerTokenState(int player, int slot) { return playersTokens[player][slot];}
 }

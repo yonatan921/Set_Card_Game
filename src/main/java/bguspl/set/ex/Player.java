@@ -1,5 +1,9 @@
 package bguspl.set.ex;
 
+import java.util.ArrayDeque;
+import java.util.Queue;
+import java.util.concurrent.ArrayBlockingQueue;
+
 import bguspl.set.Env;
 
 /**
@@ -51,6 +55,10 @@ public class Player implements Runnable {
     private int score;
 
     //private queue (capacity = 3) public function of push,pop,get size
+    private ArrayBlockingQueue<Integer> queue; 
+
+    private int tokensPlaced;
+
 
     /**
      * The class constructor.
@@ -66,6 +74,8 @@ public class Player implements Runnable {
         this.table = table;
         this.id = id;
         this.human = human;
+        queue = new ArrayBlockingQueue<>(3);
+        tokensPlaced = 0;
     }
 
     /**
@@ -114,6 +124,7 @@ public class Player implements Runnable {
      */
     public void terminate() {
         // TODO implement
+        terminate = true;
     }
 
     /**
@@ -123,6 +134,29 @@ public class Player implements Runnable {
      */
     public void keyPressed(int slot) {
         // TODO implement
+        //add to queue
+        //attempt to pop (and place token)
+        queue.add(slot);
+        queuePop();
+    }
+
+    private void queuePop() {
+        Integer slotNum = queue.remove();
+        boolean tokenStateAtSlot = table.getPlayerTokenState(id, slotNum);
+        if(tokenStateAtSlot) {
+            tokensPlaced--; // should be synced
+            table.removeToken(id, slotNum);
+        }
+        else {
+            if(tokensPlaced < 3) {
+                tokensPlaced++;
+                table.placeToken(id, slotNum);
+                if(tokensPlaced == 3){
+                    //submit set to dealer
+                    
+                }
+            }
+        }
     }
 
     /**
@@ -147,5 +181,9 @@ public class Player implements Runnable {
 
     public int getScore() {
         return score;
+    }
+
+    public int getId() {
+        return id;
     }
 }
