@@ -4,6 +4,7 @@ import bguspl.set.Env;
 
 import java.io.InterruptedIOException;
 import java.lang.ProcessBuilder.Redirect.Type;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -205,9 +206,7 @@ public class Dealer implements Runnable {
         //remove from table - insert back to deck
         //MAGIC NUMBER - 11
             table.removeAllTokens();
-            for(Player p : players) {
-                p.removeAllTokens();
-            }
+            Arrays.stream(players).forEach(Player::removeAllTokens);
             List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
             Collections.shuffle(li);
             for(int i = 0; i < li.size(); i++) {
