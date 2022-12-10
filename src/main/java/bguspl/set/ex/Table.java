@@ -147,5 +147,10 @@ public class Table {
         return false;
     }
 
+    public void removeAllTokens() {
+        playersTokens = new boolean[env.config.players][env.config.rows*env.config.columns];
+        env.ui.removeTokens();
+    }
+
     public boolean getPlayerTokenState(int player, int slot) { return playersTokens[player][slot];}
 }

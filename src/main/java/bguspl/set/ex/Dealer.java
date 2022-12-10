@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.logging.Level;
 
 import javax.naming.InterruptedNamingException;
 
@@ -67,6 +68,7 @@ public class Dealer implements Runnable {
     public void run() {
         dealerThread = Thread.currentThread();
         System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
+        env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " starting.");
         for (Player player : players) {
             Thread pThread = new Thread(player, "player" + player.getId());
             pThread.start();
@@ -173,6 +175,7 @@ public class Dealer implements Runnable {
         } catch(InterruptedException ex){
             //handle interrput (check set...)
             System.out.println("info: got interrupted"); //remove latar
+            env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " terminated.");
         }
     }
 
@@ -201,6 +204,10 @@ public class Dealer implements Runnable {
         // TODO implement
         //remove from table - insert back to deck
         //MAGIC NUMBER - 11
+            table.removeAllTokens();
+            for(Player p : players) {
+                p.removeAllTokens();
+            }
             List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
             Collections.shuffle(li);
             for(int i = 0; i < li.size(); i++) {

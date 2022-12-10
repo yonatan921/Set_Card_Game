@@ -3,6 +3,7 @@ package bguspl.set.ex;
 import java.util.ArrayDeque;
 import java.util.Queue;
 import java.util.concurrent.ArrayBlockingQueue;
+import java.util.logging.Level;
 
 import bguspl.set.Env;
 
@@ -85,6 +86,7 @@ public class Player implements Runnable {
     public void run() {
         playerThread = Thread.currentThread();
         System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
+        env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + "starting.");
         if (!human) createArtificialIntelligence();
 
         while (!terminate) {
@@ -97,6 +99,7 @@ public class Player implements Runnable {
              */
         }
         if (!human) try { aiThread.join(); } catch (InterruptedException ignored) {}
+        env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " terminated.");
         System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
     }
 
@@ -107,6 +110,7 @@ public class Player implements Runnable {
     private void createArtificialIntelligence() {
         // note: this is a very very smart AI (!)
         aiThread = new Thread(() -> {
+            env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " starting.");
             System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
             while (!terminate) {
                 // TODO implement player key press simulator
@@ -115,6 +119,7 @@ public class Player implements Runnable {
                 } catch (InterruptedException ignored) {}
             }
             System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
+            env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " terminated.");
         }, "computer-" + id);
         aiThread.start();
     }
@@ -143,6 +148,7 @@ public class Player implements Runnable {
     private void queuePop() {
         Integer slotNum = queue.remove();
         boolean tokenStateAtSlot = table.getPlayerTokenState(id, slotNum);
+        System.out.println("queuePop");
         if(tokenStateAtSlot) {
             tokensPlaced--; // should be synced
             table.removeToken(id, slotNum);
@@ -153,7 +159,7 @@ public class Player implements Runnable {
                 table.placeToken(id, slotNum);
                 if(tokensPlaced == 3){
                     //submit set to dealer
-                    
+                    System.out.println("placed 3");
                 }
             }
         }
@@ -185,5 +191,10 @@ public class Player implements Runnable {
 
     public int getId() {
         return id;
+    }
+
+    public void removeAllTokens() {
+        tokensPlaced = 0;
+        queue.clear();
     }
 }
