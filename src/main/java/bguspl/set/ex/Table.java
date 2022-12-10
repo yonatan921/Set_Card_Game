@@ -81,11 +81,13 @@ public class Table {
      * @return - the number of cards on the table.
      */
     public int countCards() {
-        int cards = 0;
-        for (Integer card : slotToCard)
-            if (card != null)
-                ++cards;
-        return cards;
+//        int cards = 0;
+//
+//        for (Integer card : slotToCard)
+//            if (card != null)
+//                ++cards;
+//        return cards;
+         return (int) Arrays.stream(slotToCard).filter(Objects::nonNull).count();
     }
 
     /**

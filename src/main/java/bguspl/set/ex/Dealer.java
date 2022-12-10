@@ -112,9 +112,7 @@ public class Dealer implements Runnable {
         // TODO implement
         //interrput!
         terminate = true;
-        for(Player p : players) {
-            p.terminate();
-        }
+        Arrays.stream(players).forEach(Player::terminate);
         //for every player: player.terminate = true;
     }
 
