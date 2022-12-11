@@ -173,6 +173,17 @@ public class Dealer implements Runnable {
         try {
             // Thread.currentThread().sleep(1000);
             wait(1000);
+            // System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
+            // int[] setTokens = table.playerSetTokens(playerIdSubmitted);
+            // boolean isValidSet = env.util.testSet(setTokens);
+            // System.out.println(isValidSet);
+            // if(isValidSet) {
+            //     //remove the cards
+            //     //reward player with a point + freeze
+            //     //reset the timer
+            // } else {
+            //     //punish player
+            // }
         } catch(InterruptedException ex){
             //handle interrput (check set...)
             System.out.println("info: got interrupted"); //remove latar
@@ -232,18 +243,25 @@ public class Dealer implements Runnable {
             acquired = true;
         } catch(InterruptedException ignored) {}
         if(acquired) {
-
-            System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
-            int[] setTokens = table.playerSetTokens(playerIdSubmitted);
-            boolean isValidSet = env.util.testSet(setTokens);
-            System.out.println(isValidSet);
-            if(isValidSet) {
-                //remove the cards
-                //reward player with a point + freeze
-                //reset the timer
-            } else {
-                //punish player
+            synchronized(this) {
+                notifyAll();
             }
+
+
+            // System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
+            // int[] setTokens = table.playerSetTokens(playerIdSubmitted);
+            // boolean isValidSet = env.util.testSet(setTokens);
+            // System.out.println(isValidSet);
+            // if(isValidSet) {
+            //     //remove the cards
+            //     //reward player with a point + freeze
+            //     //reset the timer
+            // } else {
+            //     //punish player
+            // }
+            try {
+                dealerThread.join();
+            } catch(InterruptedException e) {}
             lock.release();
         }
     }
