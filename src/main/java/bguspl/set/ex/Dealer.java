@@ -175,7 +175,6 @@ public class Dealer implements Runnable {
         } catch(InterruptedException ex){
             //handle interrput (check set...)
             System.out.println("info: got interrupted"); //remove latar
-            env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " terminated.");
         }
     }
 
@@ -239,7 +238,7 @@ public class Dealer implements Runnable {
             System.out.println(isValidSet);
             if(isValidSet) {
                 //remove the cards
-                //reward player with a point
+                //reward player with a point + freeze
                 //reset the timer
             } else {
                 //punish player

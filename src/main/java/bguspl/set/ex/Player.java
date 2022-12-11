@@ -100,6 +100,16 @@ public class Player implements Runnable {
              * else
              *  wait until key press
              */
+            System.out.println(this);
+            synchronized(this) {
+                try {
+                    // Thread.currentThread().wait();
+                    wait();
+                    queuePop();
+                } catch(InterruptedException e) {
+                    //handle key press
+                }
+            }
         }
         if (!human) try { aiThread.join(); } catch (InterruptedException ignored) {}
         env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " terminated.");
@@ -145,7 +155,11 @@ public class Player implements Runnable {
         //add to queue
         //attempt to pop (and place token)
         queue.add(slot);
-        queuePop();
+        // playerThread.interrupt(); //or notify
+        synchronized(this) {
+            notifyAll();
+        }
+        // queuePop();
     }
 
     private void queuePop() {
@@ -163,6 +177,7 @@ public class Player implements Runnable {
                     //submit set to dealer
                     System.out.println("placed 3");
                     dealer.submitedSet(id);
+                    //wait for reward/penalty
                 }
             }
         }
