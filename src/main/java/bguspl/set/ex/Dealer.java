@@ -171,7 +171,8 @@ public class Dealer implements Runnable {
     private void sleepUntilWokenOrTimeout() {
         // TODO implement
         try {
-            Thread.currentThread().sleep(1000);
+            // Thread.currentThread().sleep(1000);
+            wait(1000);
         } catch(InterruptedException ex){
             //handle interrput (check set...)
             System.out.println("info: got interrupted"); //remove latar
