@@ -154,4 +154,16 @@ public class Table {
     }
 
     public boolean getPlayerTokenState(int player, int slot) { return playersTokens[player][slot];}
+
+    public int[] playerSetTokens(int player) {
+        int[] tokensSlots = new int[3];
+        for(int i = 0, j = 0; i < playersTokens[player].length; i++) {
+            if(playersTokens[player][i]) {
+                tokensSlots[j] = slotToCard[i];
+                j++;
+            }
+        }
+        
+        return tokensSlots;
+    }
 }

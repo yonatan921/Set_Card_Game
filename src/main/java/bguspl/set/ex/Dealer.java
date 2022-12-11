@@ -1,6 +1,7 @@
 package bguspl.set.ex;
 
 import bguspl.set.Env;
+import bguspl.set.Util;
 
 import java.io.InterruptedIOException;
 import java.lang.ProcessBuilder.Redirect.Type;
@@ -47,7 +48,7 @@ public class Dealer implements Runnable {
 
     private long milliseconds;
 
-    private final long MINUTE = 5000;
+    private final long MINUTE = 60000;
 
     private Thread dealerThread;
 
@@ -231,7 +232,18 @@ public class Dealer implements Runnable {
             acquired = true;
         } catch(InterruptedException ignored) {}
         if(acquired) {
+
             System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
+            int[] setTokens = table.playerSetTokens(playerIdSubmitted);
+            boolean isValidSet = env.util.testSet(setTokens);
+            System.out.println(isValidSet);
+            if(isValidSet) {
+                //remove the cards
+                //reward player with a point
+                //reset the timer
+            } else {
+                //punish player
+            }
             lock.release();
         }
     }

@@ -60,6 +60,8 @@ public class Player implements Runnable {
 
     private int tokensPlaced;
 
+    private Dealer dealer;
+
 
     /**
      * The class constructor.
@@ -77,6 +79,7 @@ public class Player implements Runnable {
         this.human = human;
         queue = new ArrayBlockingQueue<>(3);
         tokensPlaced = 0;
+        this.dealer = dealer;
     }
 
     /**
@@ -148,7 +151,6 @@ public class Player implements Runnable {
     private void queuePop() {
         Integer slotNum = queue.remove();
         boolean tokenStateAtSlot = table.getPlayerTokenState(id, slotNum);
-        System.out.println("queuePop");
         if(tokenStateAtSlot) {
             tokensPlaced--; // should be synced
             table.removeToken(id, slotNum);
@@ -160,6 +162,7 @@ public class Player implements Runnable {
                 if(tokensPlaced == 3){
                     //submit set to dealer
                     System.out.println("placed 3");
+                    dealer.submitedSet(id);
                 }
             }
         }
