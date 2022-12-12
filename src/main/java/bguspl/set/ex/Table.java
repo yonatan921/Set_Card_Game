@@ -145,7 +145,14 @@ public class Table {
         // TODO implement
         playersTokens[player][slot] = false;
         env.ui.removeToken(player, slot);
-        return false;
+        return false; //change from boolean
+    }
+
+    public void removeToken(int slot) {
+        // TODO implement
+        for(int i = 0; i < playersTokens.length; i++) {
+            removeToken(i, slot);
+        }
     }
 
     public void removeAllTokens() {
@@ -153,10 +160,16 @@ public class Table {
         env.ui.removeTokens();
     }
 
+    public void removeCardsFromTable(int cardsToRemove) {
+        int slot = cardToSlot[cardsToRemove];
+        removeToken(slot);
+        removeCard(slot);
+    }
+
     public boolean getPlayerTokenState(int player, int slot) { return playersTokens[player][slot];}
 
-    public int[] playerSetTokens(int player) {
-        int[] tokensSlots = new int[3];
+    public Integer[] playerSetTokens(int player) {
+        Integer[] tokensSlots = new Integer[3];
         for(int i = 0, j = 0; i < playersTokens[player].length; i++) {
             if(playersTokens[player][i]) {
                 tokensSlots[j] = slotToCard[i];

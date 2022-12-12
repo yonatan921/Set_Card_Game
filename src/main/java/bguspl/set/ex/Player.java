@@ -88,6 +88,14 @@ public class Player implements Runnable {
         allowedToPlaceTokens = toSet;
     }
 
+    public int incrementScore() {
+        return ++score;
+    }
+
+    public void setTokensPlaced(int tokensPlaced) {
+        this.tokensPlaced = tokensPlaced;
+    }
+
     /**
      * The main player thread of each player starts here (main loop for the player thread).
      */
@@ -106,7 +114,7 @@ public class Player implements Runnable {
              * else
              *  wait until key press
              */
-            System.out.println(this);
+            // System.out.println(this);
             synchronized(this) {
                 try {
                     // Thread.currentThread().wait();
@@ -157,15 +165,12 @@ public class Player implements Runnable {
      * @param slot - the slot corresponding to the key pressed.
      */
     public void keyPressed(int slot) {
-        // TODO implement
-        //add to queue
-        //attempt to pop (and place token)
-        queue.add(slot);
-        // playerThread.interrupt(); //or notify
-        synchronized(this) {
-            notifyAll();
+        if(allowedToPlaceTokens) {
+            queue.add(slot);
+            synchronized(this) {
+                notifyAll();
+            }
         }
-        // queuePop();
     }
 
     private void queuePop() {

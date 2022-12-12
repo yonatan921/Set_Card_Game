@@ -8,6 +8,7 @@ import java.lang.ProcessBuilder.Redirect.Type;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -48,7 +49,7 @@ public class Dealer implements Runnable {
 
     private long milliseconds;
 
-    private final long MINUTE = 60000;
+    private final long MINUTE = 30000;
 
     private Thread dealerThread;
 
@@ -104,8 +105,8 @@ public class Dealer implements Runnable {
             if(milliseconds == MINUTE || (System.currentTimeMillis() - lastSecond)/1000 == 1) //checks if 1 second passed, updates only if it did
                 updateTimerDisplay(false);
             if(milliseconds < 0) {break;}
-            removeCardsFromTable();
-            placeCardsOnTable();
+            // removeCardsFromTable();
+            // placeCardsOnTable();
         }
     }
 
@@ -132,8 +133,16 @@ public class Dealer implements Runnable {
     /**
      * Checks if any cards should be removed from the table and returns them to the deck.
      */
-    private void removeCardsFromTable() {
+    private void removeCardsFromTable(int[] cardsToRemove) {
         // TODO implement
+        // remove the tokens on those cards
+        for(int i = 0; i < cardsToRemove.length; i++) {
+            table.removeCardsFromTable(cardsToRemove[i]);
+            // try {
+            //     Thread.currentThread().sleep(env.config.tableDelayMillis);
+            // } catch(InterruptedException ex) {}
+        }
+
     }
 
     /**
@@ -165,7 +174,7 @@ public class Dealer implements Runnable {
                 } catch(InterruptedException ex) {}
             }
         }
-        // Arrays.stream(players).forEach(Player::setAllowedTokens(true));
+        Arrays.stream(players).forEach(p -> p.setAllowedTokens(true));
         reshuffleTime = System.currentTimeMillis() + MINUTE;
     }
 
@@ -180,15 +189,31 @@ public class Dealer implements Runnable {
             if(playerSubmittedSet != -1) {
                 System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
                 System.out.printf("player who submitted set: " + playerSubmittedSet);
-                int[] setTokens = table.playerSetTokens(playerSubmittedSet);
-                boolean isValidSet = env.util.testSet(setTokens);
-                System.out.println(isValidSet);
-                if(isValidSet) {
-                    //remove the cards
-                    //reward player with a point + freeze
-                    //reset the timer
-                } else {
-                    //punish player
+                Integer[] setTokens = table.playerSetTokens(playerSubmittedSet);
+                long numOfActualTokens = Arrays.stream(setTokens).filter(Objects::nonNull).count();
+                Player player = players[playerSubmittedSet];
+                
+                if(numOfActualTokens == 3) { //MAGIC NUMBER
+                    int[] setTokensConverted = new int[3];
+                    for(int i = 0; i < 3; i++) {
+                        setTokensConverted[i] = (int)setTokens[i];
+                    }
+                    // System.arraycopy(setTokens, 0, setTokensConverted, 0, 3);
+                    boolean isValidSet = env.util.testSet(setTokensConverted);
+                    System.out.println(isValidSet);
+                    if(isValidSet) {
+                        //remove the cards
+                        removeCardsFromTable(setTokensConverted);
+                        placeCardsOnTable();
+                        player.setTokensPlaced(0);
+                        //reward player with a point + freeze
+                        int scoreToUpdate = player.incrementScore();
+                        env.ui.setScore(playerSubmittedSet, scoreToUpdate);
+                        //reset the timer
+                    } else {
+                        player.setTokensPlaced((int)numOfActualTokens);
+                        //punish player
+                    }
                 }
                 playerSubmittedSet = -1;
             }
@@ -223,6 +248,7 @@ public class Dealer implements Runnable {
         // TODO implement
         //remove from table - insert back to deck
         //MAGIC NUMBER - 11
+            Arrays.stream(players).forEach(p -> p.setAllowedTokens(false));
             table.removeAllTokens();
             Arrays.stream(players).forEach(Player::removeAllTokens);
             List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
