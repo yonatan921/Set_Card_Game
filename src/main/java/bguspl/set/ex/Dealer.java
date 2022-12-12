@@ -165,6 +165,7 @@ public class Dealer implements Runnable {
                 } catch(InterruptedException ex) {}
             }
         }
+        // Arrays.stream(players).forEach(Player::setAllowedTokens(true));
         reshuffleTime = System.currentTimeMillis() + MINUTE;
     }
 
@@ -254,7 +255,6 @@ public class Dealer implements Runnable {
                 playerSubmittedSet = playerIdSubmitted;
                 notifyAll();
             }
-
 
             // System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
             // int[] setTokens = table.playerSetTokens(playerIdSubmitted);

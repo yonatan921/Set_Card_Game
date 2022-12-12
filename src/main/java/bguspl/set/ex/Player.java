@@ -62,6 +62,7 @@ public class Player implements Runnable {
 
     private Dealer dealer;
 
+    private boolean allowedToPlaceTokens;
 
     /**
      * The class constructor.
@@ -80,6 +81,11 @@ public class Player implements Runnable {
         queue = new ArrayBlockingQueue<>(3);
         tokensPlaced = 0;
         this.dealer = dealer;
+        allowedToPlaceTokens = false;
+    }
+
+    public void setAllowedTokens(boolean toSet) {
+        allowedToPlaceTokens = toSet;
     }
 
     /**
