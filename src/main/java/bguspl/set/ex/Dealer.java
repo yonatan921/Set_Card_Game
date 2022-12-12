@@ -54,6 +54,8 @@ public class Dealer implements Runnable {
 
     private Semaphore lock = new Semaphore(1, true);
 
+    private int playerSubmittedSet;
+
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
         this.table = table;
@@ -61,6 +63,7 @@ public class Dealer implements Runnable {
         deck = IntStream.range(0, env.config.deckSize).boxed().collect(Collectors.toList());
         reshuffleTime = System.currentTimeMillis() + MINUTE;
         milliseconds = MINUTE;
+        playerSubmittedSet = -1;
     }
 
     /**
@@ -168,22 +171,26 @@ public class Dealer implements Runnable {
     /**
      * Sleep for a fixed amount of time or until the thread is awakened for some purpose.
      */
-    private void sleepUntilWokenOrTimeout() {
+    private synchronized void sleepUntilWokenOrTimeout() {
         // TODO implement
         try {
             // Thread.currentThread().sleep(1000);
             wait(1000);
-            // System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
-            // int[] setTokens = table.playerSetTokens(playerIdSubmitted);
-            // boolean isValidSet = env.util.testSet(setTokens);
-            // System.out.println(isValidSet);
-            // if(isValidSet) {
-            //     //remove the cards
-            //     //reward player with a point + freeze
-            //     //reset the timer
-            // } else {
-            //     //punish player
-            // }
+            if(playerSubmittedSet != -1) {
+                System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
+                System.out.printf("player who submitted set: " + playerSubmittedSet);
+                int[] setTokens = table.playerSetTokens(playerSubmittedSet);
+                boolean isValidSet = env.util.testSet(setTokens);
+                System.out.println(isValidSet);
+                if(isValidSet) {
+                    //remove the cards
+                    //reward player with a point + freeze
+                    //reset the timer
+                } else {
+                    //punish player
+                }
+                playerSubmittedSet = -1;
+            }
         } catch(InterruptedException ex){
             //handle interrput (check set...)
             System.out.println("info: got interrupted"); //remove latar
@@ -243,7 +250,8 @@ public class Dealer implements Runnable {
             acquired = true;
         } catch(InterruptedException ignored) {}
         if(acquired) {
-            synchronized(this) {
+            synchronized(this) {  
+                playerSubmittedSet = playerIdSubmitted;
                 notifyAll();
             }
 
@@ -259,9 +267,9 @@ public class Dealer implements Runnable {
             // } else {
             //     //punish player
             // }
-            try {
-                dealerThread.join();
-            } catch(InterruptedException e) {}
+            // try {
+            //     dealerThread.join();
+            // } catch(InterruptedException e) {}
             lock.release();
         }
     }
