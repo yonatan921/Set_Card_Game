@@ -187,8 +187,8 @@ public class Dealer implements Runnable {
             // Thread.currentThread().sleep(1000);
             wait(1000);
             if(playerSubmittedSet != -1) {
-                System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
-                System.out.printf("player who submitted set: " + playerSubmittedSet);
+                // System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
+                // System.out.printf("player who submitted set: " + playerSubmittedSet);
                 Integer[] setTokens = table.playerSetTokens(playerSubmittedSet);
                 long numOfActualTokens = Arrays.stream(setTokens).filter(Objects::nonNull).count();
                 Player player = players[playerSubmittedSet];
@@ -210,6 +210,7 @@ public class Dealer implements Runnable {
                         int scoreToUpdate = player.incrementScore();
                         env.ui.setScore(playerSubmittedSet, scoreToUpdate);
                         //reset the timer
+                        updateTimerDisplay(true);
                     } else {
                         player.setTokensPlaced((int)numOfActualTokens);
                         //punish player
@@ -228,16 +229,23 @@ public class Dealer implements Runnable {
      */
     private void updateTimerDisplay(boolean reset) {
         // TODO implement
-        if(!reset) {
-            if(milliseconds >= 0) {
-                env.ui.setCountdown(milliseconds, false);
-
-                milliseconds -= 1000;
-            } else {
-                reshuffleTime = System.currentTimeMillis() + MINUTE;
-                milliseconds = MINUTE;
-            }
+        if(reset || milliseconds < 0) {
+            reshuffleTime = System.currentTimeMillis() + MINUTE;
+            milliseconds = MINUTE;
+        } else if(milliseconds >= 0){
+            env.ui.setCountdown(milliseconds, false);
+            milliseconds -= 1000;
         }
+        // if(!reset) {
+        //     if(milliseconds >= 0) {
+        //         env.ui.setCountdown(milliseconds, false);
+
+        //         milliseconds -= 1000;
+        //     } else {
+        //         reshuffleTime = System.currentTimeMillis() + MINUTE;
+        //         milliseconds = MINUTE;
+        //     }
+        // } 
     }
 
     /**

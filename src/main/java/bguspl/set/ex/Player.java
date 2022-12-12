@@ -186,7 +186,7 @@ public class Player implements Runnable {
                 table.placeToken(id, slotNum);
                 if(tokensPlaced == 3){
                     //submit set to dealer
-                    System.out.println("placed 3");
+                    // System.out.println("placed 3");
                     dealer.submitedSet(id);
                     //wait for reward/penalty
                 }
