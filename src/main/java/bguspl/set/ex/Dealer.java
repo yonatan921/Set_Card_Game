@@ -49,7 +49,7 @@ public class Dealer implements Runnable {
 
     private long milliseconds;
 
-    private final long MINUTE = 30000;
+    private final long MINUTE = 60000;
 
     private Thread dealerThread;
 
@@ -137,7 +137,7 @@ public class Dealer implements Runnable {
         // TODO implement
         // remove the tokens on those cards
         for(int i = 0; i < cardsToRemove.length; i++) {
-            table.removeCardsFromTable(cardsToRemove[i]);
+            table.removeCardsFromTable(cardsToRemove[i], players);
             // try {
             //     Thread.currentThread().sleep(env.config.tableDelayMillis);
             // } catch(InterruptedException ex) {}
@@ -205,16 +205,20 @@ public class Dealer implements Runnable {
                         //remove the cards
                         removeCardsFromTable(setTokensConverted);
                         placeCardsOnTable();
-                        player.setTokensPlaced(0);
-                        //reward player with a point + freeze
-                        int scoreToUpdate = player.incrementScore();
-                        env.ui.setScore(playerSubmittedSet, scoreToUpdate);
+                        // player.setTokensPlaced(0);
+                        // //reward player with a point + freeze
+                        // int scoreToUpdate = player.incrementScore();
+                        // env.ui.setScore(playerSubmittedSet, scoreToUpdate);
                         //reset the timer
+                        player.point();
+                        player.handleFreeze(env.config.pointFreezeMillis);
                         updateTimerDisplay(true);
                     } else {
                         player.setTokensPlaced((int)numOfActualTokens);
                         //punish player
+                        player.handleFreeze(env.config.penaltyFreezeMillis);
                     }
+                    
                 }
                 playerSubmittedSet = -1;
             }

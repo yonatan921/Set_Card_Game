@@ -148,9 +148,13 @@ public class Table {
         return false; //change from boolean
     }
 
-    public void removeToken(int slot) {
+    public void removeToken(int slot, Player[] players) {
         // TODO implement
+        //players.setTokensNumber(num--)
         for(int i = 0; i < playersTokens.length; i++) {
+            if(playersTokens[i][slot]) {
+                players[i].setTokensPlaced(players[i].getTokensPlaced() - 1);
+            }
             removeToken(i, slot);
         }
     }
@@ -160,9 +164,9 @@ public class Table {
         env.ui.removeTokens();
     }
 
-    public void removeCardsFromTable(int cardsToRemove) {
+    public void removeCardsFromTable(int cardsToRemove, Player[] players) {
         int slot = cardToSlot[cardsToRemove];
-        removeToken(slot);
+        removeToken(slot, players);
         removeCard(slot);
     }
 

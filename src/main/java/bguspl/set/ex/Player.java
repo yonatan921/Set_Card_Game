@@ -64,6 +64,8 @@ public class Player implements Runnable {
 
     private boolean allowedToPlaceTokens;
 
+    private long freezeMillis;
+
     /**
      * The class constructor.
      *
@@ -82,6 +84,7 @@ public class Player implements Runnable {
         tokensPlaced = 0;
         this.dealer = dealer;
         allowedToPlaceTokens = false;
+        freezeMillis = 0;
     }
 
     public void setAllowedTokens(boolean toSet) {
@@ -94,6 +97,16 @@ public class Player implements Runnable {
 
     public void setTokensPlaced(int tokensPlaced) {
         this.tokensPlaced = tokensPlaced;
+    }
+
+    public int getTokensPlaced() {
+        return tokensPlaced;
+    }
+
+    public synchronized void handleFreeze(long millis) {
+        freezeMillis = millis;
+        setAllowedTokens(false);
+        notifyAll();
     }
 
     /**
@@ -189,6 +202,14 @@ public class Player implements Runnable {
                     // System.out.println("placed 3");
                     dealer.submitedSet(id);
                     //wait for reward/penalty
+                    synchronized(this) {
+                        try {
+                            wait();
+                        } catch(InterruptedException e) {
+
+                        }
+                    }
+                    penalty(); //freeze/penalty
                 }
             }
         }
@@ -204,7 +225,10 @@ public class Player implements Runnable {
         // TODO implement
 
         int ignored = table.countCards(); // this part is just for demonstration in the unit tests
-        env.ui.setScore(id, ++score);
+        setTokensPlaced(0);
+        //reward player with a point + freeze
+        int scoreToUpdate = incrementScore();
+        env.ui.setScore(id, score);
     }
 
     /**
@@ -212,6 +236,19 @@ public class Player implements Runnable {
      */
     public void penalty() {
         // TODO implement
+        System.out.println("wer'e in penalty");
+        System.out.printf("Info: Thread %s FREEZING.%n", Thread.currentThread().getName());
+
+        while(freezeMillis > 0) {
+            env.ui.setFreeze(id, freezeMillis);
+            try {
+                playerThread.sleep(1000); //MIGHT BE PROBLEMATIC
+            } catch (InterruptedException e) {}
+            freezeMillis -= 1000;
+        }
+        env.ui.setFreeze(id, freezeMillis);
+        //enable presses
+        setAllowedTokens(true);
     }
 
     public int getScore() {
