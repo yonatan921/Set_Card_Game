@@ -119,9 +119,11 @@ public class Table {
 
         // TODO implement
         Integer card = slotToCard[slot];
-        slotToCard[slot] = null;
-        cardToSlot[card] = null;
-        env.ui.removeCard(slot);
+        if(card != null) {
+            slotToCard[slot] = null;
+            cardToSlot[card] = null;
+            env.ui.removeCard(slot);
+        }
     }
 
     /**

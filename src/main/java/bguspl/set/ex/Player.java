@@ -2,6 +2,7 @@ package bguspl.set.ex;
 
 import java.util.ArrayDeque;
 import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.logging.Level;
 
@@ -66,6 +67,9 @@ public class Player implements Runnable {
 
     private long freezeMillis;
 
+    private Random rnd;
+
+
     /**
      * The class constructor.
      *
@@ -85,6 +89,7 @@ public class Player implements Runnable {
         this.dealer = dealer;
         allowedToPlaceTokens = false;
         freezeMillis = 0;
+        rnd = new Random();
     }
 
     public void setAllowedTokens(boolean toSet) {
@@ -154,14 +159,25 @@ public class Player implements Runnable {
             System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
             while (!terminate) {
                 // TODO implement player key press simulator
-                try {
-                    synchronized (this) { wait(); }
-                } catch (InterruptedException ignored) {}
+                // try { // noSuchElementException
+                //     synchronized (this) { wait(env.config.tableDelayMillis * 12); }
+                // } catch (InterruptedException ignored) {}
+                // pickRandomSlot();
+                // queuePop();
             }
             System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
             env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " terminated.");
         }, "computer-" + id);
         aiThread.start();
+    }
+
+    private void pickRandomSlot() {
+        Random rnd = new Random();
+        int slot = rnd.nextInt(12);
+        System.out.println(slot);
+        if(allowedToPlaceTokens) {
+            queue.add(slot);
+        }
     }
 
     /**
@@ -236,9 +252,6 @@ public class Player implements Runnable {
      */
     public void penalty() {
         // TODO implement
-        System.out.println("wer'e in penalty");
-        System.out.printf("Info: Thread %s FREEZING.%n", Thread.currentThread().getName());
-
         while(freezeMillis > 0) {
             env.ui.setFreeze(id, freezeMillis);
             try {
@@ -251,7 +264,7 @@ public class Player implements Runnable {
         setAllowedTokens(true);
     }
 
-    public int getScore() {
+    public int score() {
         return score;
     }
 
