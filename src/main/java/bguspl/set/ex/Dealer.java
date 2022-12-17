@@ -7,8 +7,10 @@ import java.io.InterruptedIOException;
 import java.lang.ProcessBuilder.Redirect.Type;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -262,11 +264,13 @@ public class Dealer implements Runnable {
             List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
             Collections.shuffle(li);
             for(int i = 0; i < li.size(); i++) {
-                deck.add(table.getCardInSlot(li.get(i)));
-                table.removeCard(li.get(i));
-                try {
-                    Thread.currentThread().sleep(env.config.tableDelayMillis);
-                } catch(InterruptedException ex) {}
+                if(li.get(i) != null) {
+                    deck.add(table.getCardInSlot(li.get(i)));
+                    table.removeCard(li.get(i));
+                    try {
+                        Thread.currentThread().sleep(env.config.tableDelayMillis);
+                    } catch(InterruptedException ex) {}
+                }
             }
         }
     }
@@ -276,6 +280,13 @@ public class Dealer implements Runnable {
      */
     private void announceWinners() {
         // TODO implement
+        //int[] of winnning players
+        Optional<Player> winner = Arrays.stream(players).max(Comparator.comparingInt(Player::score));
+        if (winner.isPresent()){
+            int score = winner.get().score();
+            int [] winners = Arrays.stream(players).filter(p -> p.score() == score).mapToInt( x -> x.id).toArray();
+            env.ui.announceWinner(winners);
+        }
     }
 
     public void submitedSet(int playerIdSubmitted) {
