@@ -109,8 +109,14 @@ public class Player implements Runnable {
     }
 
     public synchronized void handleFreeze(long millis) {
+        // System.out.println("handle freeze " + millis);
         freezeMillis = millis;
-        setAllowedTokens(false);
+        setAllowedTokens(false); 
+        notifyAll();
+        // System.out.println("notified in handlefreeze");
+    }
+
+    public synchronized void freeFromWait() {
         notifyAll();
     }
 
@@ -137,7 +143,9 @@ public class Player implements Runnable {
                 try {
                     // Thread.currentThread().wait();
                     wait();
-                    queuePop();
+                    if(human) {
+                        queuePop();
+                    }
                 } catch(InterruptedException e) {
                     //handle key press
                 }
@@ -159,10 +167,12 @@ public class Player implements Runnable {
             System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
             while (!terminate) {
                 // TODO implement player key press simulator
+                // System.out.println("im in ai run before wait " + System.currentTimeMillis() + " " + Thread.currentThread().getName());
                 // try { // noSuchElementException
-                //     synchronized (this) { wait(env.config.tableDelayMillis * 12); }
+                //     synchronized (this) { wait(4000); }
                 // } catch (InterruptedException ignored) {}
-                // pickRandomSlot();
+                // System.out.println("im in ai run before wait " + System.currentTimeMillis());
+                pickRandomSlot();
                 // queuePop();
             }
             System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
@@ -172,11 +182,13 @@ public class Player implements Runnable {
     }
 
     private void pickRandomSlot() {
+        // System.out.println("im in random slot " + Thread.currentThread().getName());
         Random rnd = new Random();
         int slot = rnd.nextInt(12);
-        System.out.println(slot);
         if(allowedToPlaceTokens) {
+            // System.out.println("allowed = " + allowedToPlaceTokens );
             queue.add(slot);
+            queuePop();
         }
     }
 
@@ -203,6 +215,7 @@ public class Player implements Runnable {
     }
 
     private void queuePop() {
+        // System.out.println("im in queuepop " + Thread.currentThread().getName());
         Integer slotNum = queue.remove();
         boolean tokenStateAtSlot = table.getPlayerTokenState(id, slotNum);
         if(tokenStateAtSlot) {
@@ -216,15 +229,26 @@ public class Player implements Runnable {
                 if(tokensPlaced == 3){
                     //submit set to dealer
                     // System.out.println("placed 3");
-                    dealer.submitedSet(id);
+                    // dealer.submitedSet(id);
                     //wait for reward/penalty
+
                     synchronized(this) {
                         try {
+                            dealer.submitedSet(id);
+                            // if(id == 0) {
+                            //     System.out.println("waiting " + Thread.currentThread().getName());
+                            // }
                             wait();
                         } catch(InterruptedException e) {
 
                         }
                     }
+                    // if(id == 0) {
+                    //     System.out.println("place tokens " + tokensPlaced);
+                    // }
+                    // if(id == 0) {
+                    //     System.out.println("out of wait " + Thread.currentThread().getName());
+                    // }
                     penalty(); //freeze/penalty
                 }
             }

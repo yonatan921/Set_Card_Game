@@ -49,7 +49,7 @@ public class Dealer implements Runnable {
 
     private long milliseconds;
 
-    private final long MINUTE = 60000;
+    private final long MINUTE = 5000;
 
     private Thread dealerThread;
 
@@ -95,9 +95,10 @@ public class Dealer implements Runnable {
     /**
      * The inner loop of the dealer thread that runs as long as the countdown did not time out.
      */
+    long lastSecond;
     private void timerLoop() {
         while (!terminate && System.currentTimeMillis() < reshuffleTime + 1500) { // set reshuffleTime = 60sec
-            long lastSecond = System.currentTimeMillis();
+            // long lastSecond = System.currentTimeMillis();
             //IMPROVE TIMER
             if(milliseconds != MINUTE) {
                 sleepUntilWokenOrTimeout();
@@ -176,6 +177,7 @@ public class Dealer implements Runnable {
         }
         Arrays.stream(players).forEach(p -> p.setAllowedTokens(true));
         reshuffleTime = System.currentTimeMillis() + MINUTE;
+        lastSecond = System.currentTimeMillis(); 
     }
 
     /**
@@ -198,27 +200,19 @@ public class Dealer implements Runnable {
                     for(int i = 0; i < 3; i++) {
                         setTokensConverted[i] = (int)setTokens[i];
                     }
-                    // System.arraycopy(setTokens, 0, setTokensConverted, 0, 3);
                     boolean isValidSet = env.util.testSet(setTokensConverted);
-                    System.out.println(isValidSet);
                     if(isValidSet) {
-                        //remove the cards
                         removeCardsFromTable(setTokensConverted);
                         placeCardsOnTable();
-                        // player.setTokensPlaced(0);
-                        // //reward player with a point + freeze
-                        // int scoreToUpdate = player.incrementScore();
-                        // env.ui.setScore(playerSubmittedSet, scoreToUpdate);
-                        //reset the timer
                         player.point();
                         player.handleFreeze(env.config.pointFreezeMillis);
                         updateTimerDisplay(true);
                     } else {
                         player.setTokensPlaced((int)numOfActualTokens);
-                        //punish player
                         player.handleFreeze(env.config.penaltyFreezeMillis);
-                    }
-                    
+                    }    
+                } else {
+                    player.freeFromWait();
                 }
                 playerSubmittedSet = -1;
             }
@@ -233,6 +227,8 @@ public class Dealer implements Runnable {
      */
     private void updateTimerDisplay(boolean reset) {
         // TODO implement
+        if((System.currentTimeMillis() - lastSecond)/1000 == 1) {
+            lastSecond = System.currentTimeMillis(); }
         if(reset || milliseconds < 0) {
             reshuffleTime = System.currentTimeMillis() + MINUTE;
             milliseconds = MINUTE;
