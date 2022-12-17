@@ -169,7 +169,7 @@ public class Player implements Runnable {
                 // TODO implement player key press simulator
                 // System.out.println("im in ai run before wait " + System.currentTimeMillis() + " " + Thread.currentThread().getName());
                 // try { // noSuchElementException
-                //     synchronized (this) { wait(4000); }
+                //     synchronized (this) { wait(50); }
                 // } catch (InterruptedException ignored) {}
                 // System.out.println("im in ai run before wait " + System.currentTimeMillis());
                 pickRandomSlot();
@@ -182,9 +182,10 @@ public class Player implements Runnable {
     }
 
     private void pickRandomSlot() {
-        // System.out.println("im in random slot " + Thread.currentThread().getName());
+        
         Random rnd = new Random();
         int slot = rnd.nextInt(12);
+
         if(allowedToPlaceTokens) {
             // System.out.println("allowed = " + allowedToPlaceTokens );
             queue.add(slot);
@@ -234,21 +235,18 @@ public class Player implements Runnable {
 
                     synchronized(this) {
                         try {
+                            System.out.println(id + " submitted abd waiting");
                             dealer.submitedSet(id);
                             // if(id == 0) {
                             //     System.out.println("waiting " + Thread.currentThread().getName());
                             // }
                             wait();
+                            System.out.println(id + " out of wait");
+
                         } catch(InterruptedException e) {
 
                         }
                     }
-                    // if(id == 0) {
-                    //     System.out.println("place tokens " + tokensPlaced);
-                    // }
-                    // if(id == 0) {
-                    //     System.out.println("out of wait " + Thread.currentThread().getName());
-                    // }
                     penalty(); //freeze/penalty
                 }
             }

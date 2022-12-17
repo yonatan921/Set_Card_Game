@@ -189,14 +189,16 @@ public class Dealer implements Runnable {
         // TODO implement
         try {
             // Thread.currentThread().sleep(1000);
+            System.out.println("went to sleep");
             wait(1000);
+            System.out.println(playerSubmittedSet + " before do");
             if(playerSubmittedSet != -1) {
                 // System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
                 // System.out.printf("player who submitted set: " + playerSubmittedSet);
                 Integer[] setTokens = table.playerSetTokens(playerSubmittedSet);
                 long numOfActualTokens = Arrays.stream(setTokens).filter(Objects::nonNull).count();
                 Player player = players[playerSubmittedSet];
-                
+                System.out.println(playerSubmittedSet);
                 if(numOfActualTokens == 3) { //MAGIC NUMBER
                     int[] setTokensConverted = new int[3];
                     for(int i = 0; i < 3; i++) {
@@ -214,7 +216,7 @@ public class Dealer implements Runnable {
                         player.handleFreeze(env.config.penaltyFreezeMillis);
                     }    
                 } else {
-                    player.freeFromWait();
+                    player.handleFreeze(0);
                 }
                 playerSubmittedSet = -1;
             }
@@ -290,32 +292,24 @@ public class Dealer implements Runnable {
     }
 
     public void submitedSet(int playerIdSubmitted) {
+
         boolean acquired = false;
         try {
             lock.acquire();
             acquired = true;
-        } catch(InterruptedException ignored) {}
-        if(acquired) {
-            synchronized(this) {  
-                playerSubmittedSet = playerIdSubmitted;
-                notifyAll();
-            }
+            if(acquired) {
+                System.out.println(playerIdSubmitted + " aquired");
 
-            // System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
-            // int[] setTokens = table.playerSetTokens(playerIdSubmitted);
-            // boolean isValidSet = env.util.testSet(setTokens);
-            // System.out.println(isValidSet);
-            // if(isValidSet) {
-            //     //remove the cards
-            //     //reward player with a point + freeze
-            //     //reset the timer
-            // } else {
-            //     //punish player
-            // }
-            // try {
-            //     dealerThread.join();
-            // } catch(InterruptedException e) {}
-            lock.release();
-        }
+                synchronized(this) {
+                    playerSubmittedSet = playerIdSubmitted;
+                    notifyAll();
+                    System.out.println("notified " + playerSubmittedSet);  
+                }
+                lock.release();
+                System.out.println(playerIdSubmitted + " released");
+
+            }
+        } catch(InterruptedException ignored) {}
+        
     }
 }
