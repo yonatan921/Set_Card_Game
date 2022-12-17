@@ -264,7 +264,7 @@ public class Dealer implements Runnable {
             List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
             Collections.shuffle(li);
             for(int i = 0; i < li.size(); i++) {
-                if(li.get(i) != null) {
+                if(table.getCardInSlot(li.get(i)) != null) {
                     deck.add(table.getCardInSlot(li.get(i)));
                     table.removeCard(li.get(i));
                     try {
