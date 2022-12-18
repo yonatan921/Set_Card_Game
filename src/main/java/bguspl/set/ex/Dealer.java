@@ -52,16 +52,15 @@ public class Dealer implements Runnable {
 
     private long milliseconds;
 
-    private final long MINUTE = 5000;
+    public static final long MINUTE = 60000;
+
+    public static final long SECOND = 1000;
 
     private Thread dealerThread;
 
-    private Semaphore lock = new Semaphore(1, true);
-
-    // private volatile int playerSubmittedSet;
-
     private ArrayBlockingQueue<Integer> submissionQ; 
 
+    public static final int SET_SIZE = 3;
 
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
@@ -70,7 +69,6 @@ public class Dealer implements Runnable {
         deck = IntStream.range(0, env.config.deckSize).boxed().collect(Collectors.toList());
         reshuffleTime = System.currentTimeMillis() + MINUTE;
         milliseconds = MINUTE;
-        // playerSubmittedSet = -1;
         submissionQ = new ArrayBlockingQueue<>(100000);
     }
 
@@ -106,16 +104,12 @@ public class Dealer implements Runnable {
     long lastSecond;
     private void timerLoop() {
         while (!terminate && System.currentTimeMillis() < reshuffleTime + 1500) { // set reshuffleTime = 60sec
-            // long lastSecond = System.currentTimeMillis();
-            //IMPROVE TIMER
             if(milliseconds != MINUTE) {
                 sleepUntilWokenOrTimeout();
             }
             if(milliseconds == MINUTE || (System.currentTimeMillis() - lastSecond)/1000 == 1) //checks if 1 second passed, updates only if it did
                 updateTimerDisplay(false);
             if(milliseconds < 0) {break;}
-            // removeCardsFromTable();
-            // placeCardsOnTable();
         }
     }
 
@@ -123,11 +117,8 @@ public class Dealer implements Runnable {
      * Called when the game should be terminated due to an external event.
      */
     public void terminate() {
-        // TODO implement
-        //interrput!
         terminate = true;
         Arrays.stream(players).forEach(Player::terminate);
-        //for every player: player.terminate = true;
     }
 
     /**
@@ -143,13 +134,8 @@ public class Dealer implements Runnable {
      * Checks if any cards should be removed from the table and returns them to the deck.
      */
     private void removeCardsFromTable(int[] cardsToRemove) {
-        // TODO implement
-        // remove the tokens on those cards
         for(int i = 0; i < cardsToRemove.length; i++) {
             table.removeCardsFromTable(cardsToRemove[i], players);
-            // try {
-            //     Thread.currentThread().sleep(env.config.tableDelayMillis);
-            // } catch(InterruptedException ex) {}
         }
 
     }
@@ -158,27 +144,15 @@ public class Dealer implements Runnable {
      * Check if any cards can be removed from the deck and placed on the table.
      */
     private void placeCardsOnTable() {
-        // TODO implement
-        /*
-         * reshuffle
-         *  while(deck > 0 & numOfCardsToPlace >0)
-         *  insert to one of the empty slots the last card in the deck
-         *  table.placeCard(int card, int slot)
-         */
-
         Collections.shuffle(deck);
         Integer[] slotToCard = table.getSlotToCard();
-        //MAGIC NUMBER - 11
-        List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
+        List<Integer> li = IntStream.rangeClosed(0, env.config.tableSize - 1).boxed().collect(Collectors.toList());
         Collections.shuffle(li);
         for(int slotNum = 0; slotNum < li.size() && deck.size() > 0; slotNum++) {
             if(slotToCard[li.get(slotNum)] == null) {
-                //remove last card from deck
                 Integer cardNum = deck.remove(deck.size() - 1);
-                // table.placeCard(int card,int slot)
                 table.placeCard(cardNum, li.get(slotNum));
                 try{
-                    //MAGIC NUMBER - 200
                     Thread.currentThread().sleep(env.config.tableDelayMillis);
                 } catch(InterruptedException ex) {}
             }
@@ -192,16 +166,10 @@ public class Dealer implements Runnable {
      * Sleep for a fixed amount of time or until the thread is awakened for some purpose.
      */
     private synchronized void sleepUntilWokenOrTimeout() {
-        // TODO implement
         try {
-            // Thread.currentThread().sleep(1000);
             wait(1000);
-            
-            // System.out.println(playerSubmittedSet + " before do");
             while(submissionQ.size() != 0) {
                 int playerSubmittedSet = submissionQ.remove();
-                // System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
-                // System.out.printf("player who submitted set: " + playerSubmittedSet);
                 Integer[] setTokens = table.playerSetTokens(playerSubmittedSet);
                 long numOfActualTokens = Arrays.stream(setTokens).filter(Objects::nonNull).count();
                 Player player = players[playerSubmittedSet];
@@ -224,37 +192,23 @@ public class Dealer implements Runnable {
                 } else {
                     player.handleFreeze(0);
                 }
-                // playerSubmittedSet = -1;
             }
-        } catch(InterruptedException ex){
-            //handle interrput (check set...)
-        }
+        } catch(InterruptedException ex){}
     }
 
     /**
      * Reset and/or update the countdown and the countdown display.
      */
     private void updateTimerDisplay(boolean reset) {
-        // TODO implement
-        if((System.currentTimeMillis() - lastSecond)/1000 == 1) {
+        if((System.currentTimeMillis() - lastSecond)/SECOND == 1) {
             lastSecond = System.currentTimeMillis(); }
         if(reset || milliseconds < 0) {
             reshuffleTime = System.currentTimeMillis() + MINUTE;
             milliseconds = MINUTE;
         } else if(milliseconds >= 0){
             env.ui.setCountdown(milliseconds, false);
-            milliseconds -= 1000;
+            milliseconds -= SECOND;
         }
-        // if(!reset) {
-        //     if(milliseconds >= 0) {
-        //         env.ui.setCountdown(milliseconds, false);
-
-        //         milliseconds -= 1000;
-        //     } else {
-        //         reshuffleTime = System.currentTimeMillis() + MINUTE;
-        //         milliseconds = MINUTE;
-        //     }
-        // } 
     }
 
     /**
@@ -262,13 +216,10 @@ public class Dealer implements Runnable {
      */
     private void removeAllCardsFromTable() {
         if(!terminate) {
-        // TODO implement
-        //remove from table - insert back to deck
-        //MAGIC NUMBER - 11
             Arrays.stream(players).forEach(p -> p.setAllowedTokens(false));
             table.removeAllTokens();
             Arrays.stream(players).forEach(Player::removeAllTokens);
-            List<Integer> li = IntStream.rangeClosed(0, 11).boxed().collect(Collectors.toList());
+            List<Integer> li = IntStream.rangeClosed(0, env.config.tableSize - 1).boxed().collect(Collectors.toList());
             Collections.shuffle(li);
             for(int i = 0; i < li.size(); i++) {
                 if(table.getCardInSlot(li.get(i)) != null) {
@@ -286,8 +237,6 @@ public class Dealer implements Runnable {
      * Check who is/are the winner/s and displays them.
      */
     private void announceWinners() {
-        // TODO implement
-        //int[] of winnning players
         Optional<Player> winner = Arrays.stream(players).max(Comparator.comparingInt(Player::score));
         if (winner.isPresent()){
             int score = winner.get().score();
@@ -297,30 +246,9 @@ public class Dealer implements Runnable {
     }
 
     public void submitedSet(int playerIdSubmitted) {
-
-        // boolean acquired = false;
-        // try {
-        //     //attempt to replace semaphore w/ blockingqueue
-        //     lock.acquire();
-        //     acquired = true;
-        //     if(acquired) {
-        //         System.out.println(playerIdSubmitted + " aquired");
-
-        //         synchronized(this) {
-        //             playerSubmittedSet = playerIdSubmitted;
-        //             notifyAll();
-        //             System.out.println("notified " + playerSubmittedSet);  
-        //         }
-        //         lock.release();
-        //         System.out.println(playerIdSubmitted + " released");
-
-        //     }
-        // } catch(InterruptedException ignored) {}
-        
         submissionQ.add(playerIdSubmitted);
         synchronized(this) {
             notifyAll();
         }
-
     }
 }

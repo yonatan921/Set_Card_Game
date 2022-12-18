@@ -104,7 +104,6 @@ public class Table {
         cardToSlot[card] = slot;
         slotToCard[slot] = card;
 
-        // TODO implement
         env.ui.placeCard(card,slot);
     }
 
@@ -143,16 +142,13 @@ public class Table {
      * @param slot   - the slot from which to remove the token.
      * @return       - true iff a token was successfully removed.
      */
-    public boolean removeToken(int player, int slot) {
+    public void removeToken(int player, int slot) {
         // TODO implement
         playersTokens[player][slot] = false;
         env.ui.removeToken(player, slot);
-        return false; //change from boolean
     }
 
     public void removeToken(int slot, Player[] players) {
-        // TODO implement
-        //players.setTokensNumber(num--)
         for(int i = 0; i < playersTokens.length; i++) {
             if(playersTokens[i][slot]) {
                 players[i].setTokensPlaced(players[i].getTokensPlaced() - 1);
