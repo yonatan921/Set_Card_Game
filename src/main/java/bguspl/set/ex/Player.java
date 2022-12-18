@@ -108,11 +108,23 @@ public class Player implements Runnable {
         return tokensPlaced;
     }
 
-    public synchronized void handleFreeze(long millis) {
+    // public synchronized void handleFreeze(long millis) {
+    //     // System.out.println("handle freeze " + millis);
+    //     freezeMillis = millis;
+    //     setAllowedTokens(false); 
+    //     notifyAll();
+    //     // System.out.println("notified in handlefreeze");
+    // }
+
+    public void handleFreeze(long millis) {
         // System.out.println("handle freeze " + millis);
         freezeMillis = millis;
         setAllowedTokens(false); 
-        notifyAll();
+        if(human) {
+            playerThread.interrupt();
+        } else {
+            aiThread.interrupt();
+        }
         // System.out.println("notified in handlefreeze");
     }
 
@@ -175,6 +187,7 @@ public class Player implements Runnable {
                 pickRandomSlot();
                 // queuePop();
             }
+            playerThread.interrupt();
             System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
             env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " terminated.");
         }, "computer-" + id);
@@ -187,7 +200,6 @@ public class Player implements Runnable {
         int slot = rnd.nextInt(12);
 
         if(allowedToPlaceTokens) {
-            // System.out.println("allowed = " + allowedToPlaceTokens );
             queue.add(slot);
             queuePop();
         }
@@ -216,7 +228,6 @@ public class Player implements Runnable {
     }
 
     private void queuePop() {
-        // System.out.println("im in queuepop " + Thread.currentThread().getName());
         Integer slotNum = queue.remove();
         boolean tokenStateAtSlot = table.getPlayerTokenState(id, slotNum);
         if(tokenStateAtSlot) {
@@ -228,26 +239,18 @@ public class Player implements Runnable {
                 tokensPlaced++;
                 table.placeToken(id, slotNum);
                 if(tokensPlaced == 3){
-                    //submit set to dealer
-                    // System.out.println("placed 3");
-                    // dealer.submitedSet(id);
-                    //wait for reward/penalty
-
-                    synchronized(this) {
                         try {
-                            System.out.println(id + " submitted abd waiting");
                             dealer.submitedSet(id);
-                            // if(id == 0) {
-                            //     System.out.println("waiting " + Thread.currentThread().getName());
-                            // }
-                            wait();
-                            System.out.println(id + " out of wait");
 
-                        } catch(InterruptedException e) {
-
-                        }
-                    }
-                    penalty(); //freeze/penalty
+                            if(human) {
+                                playerThread.sleep(4000);
+                            } else {
+                                aiThread.sleep(4000);
+                            }
+                            
+                            
+                        } catch(InterruptedException e) {}
+                    penalty();
                 }
             }
         }

@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Semaphore;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -57,7 +58,10 @@ public class Dealer implements Runnable {
 
     private Semaphore lock = new Semaphore(1, true);
 
-    private int playerSubmittedSet;
+    // private volatile int playerSubmittedSet;
+
+    private ArrayBlockingQueue<Integer> submissionQ; 
+
 
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
@@ -66,7 +70,8 @@ public class Dealer implements Runnable {
         deck = IntStream.range(0, env.config.deckSize).boxed().collect(Collectors.toList());
         reshuffleTime = System.currentTimeMillis() + MINUTE;
         milliseconds = MINUTE;
-        playerSubmittedSet = -1;
+        // playerSubmittedSet = -1;
+        submissionQ = new ArrayBlockingQueue<>(100000);
     }
 
     /**
@@ -88,6 +93,7 @@ public class Dealer implements Runnable {
             updateTimerDisplay(false);
             removeAllCardsFromTable();
         }
+        terminate();
         announceWinners();
                
         System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
@@ -189,16 +195,16 @@ public class Dealer implements Runnable {
         // TODO implement
         try {
             // Thread.currentThread().sleep(1000);
-            System.out.println("went to sleep");
             wait(1000);
-            System.out.println(playerSubmittedSet + " before do");
-            if(playerSubmittedSet != -1) {
+            
+            // System.out.println(playerSubmittedSet + " before do");
+            while(submissionQ.size() != 0) {
+                int playerSubmittedSet = submissionQ.remove();
                 // System.out.printf("Info: Thread %s submitted set.%n", Thread.currentThread().getName());
                 // System.out.printf("player who submitted set: " + playerSubmittedSet);
                 Integer[] setTokens = table.playerSetTokens(playerSubmittedSet);
                 long numOfActualTokens = Arrays.stream(setTokens).filter(Objects::nonNull).count();
                 Player player = players[playerSubmittedSet];
-                System.out.println(playerSubmittedSet);
                 if(numOfActualTokens == 3) { //MAGIC NUMBER
                     int[] setTokensConverted = new int[3];
                     for(int i = 0; i < 3; i++) {
@@ -218,11 +224,10 @@ public class Dealer implements Runnable {
                 } else {
                     player.handleFreeze(0);
                 }
-                playerSubmittedSet = -1;
+                // playerSubmittedSet = -1;
             }
         } catch(InterruptedException ex){
             //handle interrput (check set...)
-            System.out.println("info: got interrupted"); //remove latar
         }
     }
 
@@ -293,23 +298,29 @@ public class Dealer implements Runnable {
 
     public void submitedSet(int playerIdSubmitted) {
 
-        boolean acquired = false;
-        try {
-            lock.acquire();
-            acquired = true;
-            if(acquired) {
-                System.out.println(playerIdSubmitted + " aquired");
+        // boolean acquired = false;
+        // try {
+        //     //attempt to replace semaphore w/ blockingqueue
+        //     lock.acquire();
+        //     acquired = true;
+        //     if(acquired) {
+        //         System.out.println(playerIdSubmitted + " aquired");
 
-                synchronized(this) {
-                    playerSubmittedSet = playerIdSubmitted;
-                    notifyAll();
-                    System.out.println("notified " + playerSubmittedSet);  
-                }
-                lock.release();
-                System.out.println(playerIdSubmitted + " released");
+        //         synchronized(this) {
+        //             playerSubmittedSet = playerIdSubmitted;
+        //             notifyAll();
+        //             System.out.println("notified " + playerSubmittedSet);  
+        //         }
+        //         lock.release();
+        //         System.out.println(playerIdSubmitted + " released");
 
-            }
-        } catch(InterruptedException ignored) {}
+        //     }
+        // } catch(InterruptedException ignored) {}
         
+        submissionQ.add(playerIdSubmitted);
+        synchronized(this) {
+            notifyAll();
+        }
+
     }
 }
