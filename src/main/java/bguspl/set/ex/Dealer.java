@@ -1,23 +1,12 @@
 package bguspl.set.ex;
 
 import bguspl.set.Env;
-import bguspl.set.Util;
 
-import java.io.InterruptedIOException;
-import java.lang.ProcessBuilder.Redirect.Type;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.Semaphore;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.logging.Level;
-
-import javax.naming.InterruptedNamingException;
 
 /**
  * This class manages the dealer's threads and data
@@ -58,7 +47,7 @@ public class Dealer implements Runnable {
 
     private Thread dealerThread;
 
-    private ArrayBlockingQueue<Integer> submissionQ; 
+    private final ArrayBlockingQueue<Integer> submissionQ;
 
     public static final int SET_SIZE = 3;
 
@@ -134,8 +123,8 @@ public class Dealer implements Runnable {
      * Checks if any cards should be removed from the table and returns them to the deck.
      */
     private void removeCardsFromTable(int[] cardsToRemove) {
-        for(int i = 0; i < cardsToRemove.length; i++) {
-            table.removeCardsFromTable(cardsToRemove[i], players);
+        for (int j : cardsToRemove) {
+            table.removeCardsFromTable(j, players);
         }
 
     }
@@ -154,7 +143,7 @@ public class Dealer implements Runnable {
                 table.placeCard(cardNum, li.get(slotNum));
                 try{
                     Thread.currentThread().sleep(env.config.tableDelayMillis);
-                } catch(InterruptedException ex) {}
+                } catch(InterruptedException ignored) {}
             }
         }
         Arrays.stream(players).forEach(p -> p.setAllowedTokens(true));
@@ -167,15 +156,15 @@ public class Dealer implements Runnable {
      */
     private synchronized void sleepUntilWokenOrTimeout() {
         try {
-            wait(1000);
+            wait(SECOND);
             while(submissionQ.size() != 0) {
                 int playerSubmittedSet = submissionQ.remove();
                 Integer[] setTokens = table.playerSetTokens(playerSubmittedSet);
                 long numOfActualTokens = Arrays.stream(setTokens).filter(Objects::nonNull).count();
                 Player player = players[playerSubmittedSet];
-                if(numOfActualTokens == 3) { //MAGIC NUMBER
-                    int[] setTokensConverted = new int[3];
-                    for(int i = 0; i < 3; i++) {
+                if(numOfActualTokens == SET_SIZE) {
+                    int[] setTokensConverted = new int[SET_SIZE];
+                    for(int i = 0; i < SET_SIZE; i++) {
                         setTokensConverted[i] = (int)setTokens[i];
                     }
                     boolean isValidSet = env.util.testSet(setTokensConverted);
@@ -193,7 +182,7 @@ public class Dealer implements Runnable {
                     player.handleFreeze(0);
                 }
             }
-        } catch(InterruptedException ex){}
+        } catch(InterruptedException ignored){}
     }
 
     /**
@@ -221,15 +210,17 @@ public class Dealer implements Runnable {
             Arrays.stream(players).forEach(Player::removeAllTokens);
             List<Integer> li = IntStream.rangeClosed(0, env.config.tableSize - 1).boxed().collect(Collectors.toList());
             Collections.shuffle(li);
-            for(int i = 0; i < li.size(); i++) {
-                if(table.getCardInSlot(li.get(i)) != null) {
-                    deck.add(table.getCardInSlot(li.get(i)));
-                    table.removeCard(li.get(i));
+            for (Integer integer : li) {
+                if (table.getCardInSlot(integer) != null) {
+                    deck.add(table.getCardInSlot(integer));
+                    table.removeCard(integer);
                     try {
                         Thread.currentThread().sleep(env.config.tableDelayMillis);
-                    } catch(InterruptedException ex) {}
+                    } catch (InterruptedException ignored) {
+                    }
                 }
             }
+            submissionQ.clear();
         }
     }
 

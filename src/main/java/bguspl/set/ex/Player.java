@@ -1,13 +1,10 @@
 package bguspl.set.ex;
 
-import java.util.ArrayDeque;
-import java.util.Queue;
+import bguspl.set.Env;
+
 import java.util.Random;
 import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
-
-import bguspl.set.Env;
 
 /**
  * This class manages the players' threads and data
@@ -58,17 +55,17 @@ public class Player implements Runnable {
     private int score;
 
     //private queue (capacity = 3) public function of push,pop,get size
-    private ArrayBlockingQueue<Integer> queue; 
+    private final ArrayBlockingQueue<Integer> queue;
 
     private int tokensPlaced;
 
-    private Dealer dealer;
+    private final Dealer dealer;
 
     private boolean allowedToPlaceTokens;
 
     private long freezeMillis;
 
-    private Random rnd;
+    private final Random rnd;
 
 
     /**
@@ -135,7 +132,7 @@ public class Player implements Runnable {
                     if(human) {
                         queuePop();
                     }
-                } catch(InterruptedException e) {}
+                } catch(InterruptedException ignored) {}
             }
         }
         if (!human) try { aiThread.join(); } catch (InterruptedException ignored) {}
@@ -210,7 +207,7 @@ public class Player implements Runnable {
                         } else {
                             aiThread.sleep(Dealer.MINUTE);
                         }
-                    } catch(InterruptedException e) {}
+                    } catch(InterruptedException ignored) {}
                     penalty();
                 }
             }
@@ -238,7 +235,7 @@ public class Player implements Runnable {
             env.ui.setFreeze(id, freezeMillis);
             try {
                 playerThread.sleep(Dealer.SECOND); //MIGHT BE PROBLEMATIC
-            } catch (InterruptedException e) {}
+            } catch (InterruptedException ignored) {}
             freezeMillis -= Dealer.SECOND;
         }
         env.ui.setFreeze(id, freezeMillis);

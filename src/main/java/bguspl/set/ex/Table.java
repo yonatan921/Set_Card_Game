@@ -29,7 +29,7 @@ public class Table {
      */
     protected final Integer[] cardToSlot; // slot per card (if any)
 
-    private boolean playersTokens[][];
+    private boolean[][] playersTokens;
     /**
      * Constructor for testing.
      *
