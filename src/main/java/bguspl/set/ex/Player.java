@@ -82,7 +82,7 @@ public class Player implements Runnable {
         this.table = table;
         this.id = id;
         this.human = human;
-        queue = new ArrayBlockingQueue<>(Dealer.SET_SIZE);
+        queue = new ArrayBlockingQueue<>(dealer.SET_SIZE);
         tokensPlaced = 0;
         this.dealer = dealer;
         allowedToPlaceTokens = false;
@@ -196,16 +196,16 @@ public class Player implements Runnable {
             table.removeToken(id, slotNum);
         }
         else {
-            if(tokensPlaced < Dealer.SET_SIZE) {
+            if(tokensPlaced < dealer.SET_SIZE) {
                 tokensPlaced++;
                 table.placeToken(id, slotNum);
-                if(tokensPlaced == Dealer.SET_SIZE){
+                if(tokensPlaced == dealer.SET_SIZE){
                     try {
                         dealer.submitedSet(id);
                         if(human) {
-                            playerThread.sleep(Dealer.MINUTE);
+                            playerThread.sleep(dealer.turnTimeout);
                         } else {
-                            aiThread.sleep(Dealer.MINUTE);
+                            aiThread.sleep(dealer.turnTimeout);
                         }
                     } catch(InterruptedException ignored) {}
                     penalty();

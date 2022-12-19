@@ -41,7 +41,7 @@ public class Dealer implements Runnable {
 
     private long milliseconds;
 
-    public static final long MINUTE = 60000;
+    public final long turnTimeout;
 
     public static final long SECOND = 1000;
 
@@ -49,16 +49,19 @@ public class Dealer implements Runnable {
 
     private final ArrayBlockingQueue<Integer> submissionQ;
 
-    public static final int SET_SIZE = 3;
+    public final int SET_SIZE;
 
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
         this.table = table;
         this.players = players;
         deck = IntStream.range(0, env.config.deckSize).boxed().collect(Collectors.toList());
-        reshuffleTime = System.currentTimeMillis() + MINUTE;
-        milliseconds = MINUTE;
+        turnTimeout = env.config.turnTimeoutMillis;
+        SET_SIZE = env.config.featureSize;
+        reshuffleTime = System.currentTimeMillis() + turnTimeout;
+        milliseconds = turnTimeout;
         submissionQ = new ArrayBlockingQueue<>(100000);
+        
     }
 
     /**
@@ -93,10 +96,10 @@ public class Dealer implements Runnable {
     long lastSecond;
     private void timerLoop() {
         while (!terminate && System.currentTimeMillis() < reshuffleTime + 1500) { // set reshuffleTime = 60sec
-            if(milliseconds != MINUTE) {
+            if(milliseconds != turnTimeout) {
                 sleepUntilWokenOrTimeout();
             }
-            if(milliseconds == MINUTE || (System.currentTimeMillis() - lastSecond)/1000 == 1) //checks if 1 second passed, updates only if it did
+            if(milliseconds == turnTimeout || (System.currentTimeMillis() - lastSecond)/1000 == 1) //checks if 1 second passed, updates only if it did
                 updateTimerDisplay(false);
             if(milliseconds < 0) {break;}
         }
@@ -147,7 +150,7 @@ public class Dealer implements Runnable {
             }
         }
         Arrays.stream(players).forEach(p -> p.setAllowedTokens(true));
-        reshuffleTime = System.currentTimeMillis() + MINUTE;
+        reshuffleTime = System.currentTimeMillis() + turnTimeout;
         lastSecond = System.currentTimeMillis(); 
     }
 
@@ -157,32 +160,36 @@ public class Dealer implements Runnable {
     private synchronized void sleepUntilWokenOrTimeout() {
         try {
             wait(SECOND);
-            while(submissionQ.size() != 0) {
-                int playerSubmittedSet = submissionQ.remove();
-                Integer[] setTokens = table.playerSetTokens(playerSubmittedSet);
-                long numOfActualTokens = Arrays.stream(setTokens).filter(Objects::nonNull).count();
-                Player player = players[playerSubmittedSet];
-                if(numOfActualTokens == SET_SIZE) {
-                    int[] setTokensConverted = new int[SET_SIZE];
-                    for(int i = 0; i < SET_SIZE; i++) {
-                        setTokensConverted[i] = (int)setTokens[i];
-                    }
-                    boolean isValidSet = env.util.testSet(setTokensConverted);
-                    if(isValidSet) {
-                        removeCardsFromTable(setTokensConverted);
-                        placeCardsOnTable();
-                        player.point();
-                        player.handleFreeze(env.config.pointFreezeMillis);
-                        updateTimerDisplay(true);
-                    } else {
-                        player.setTokensPlaced((int)numOfActualTokens);
-                        player.handleFreeze(env.config.penaltyFreezeMillis);
-                    }    
-                } else {
-                    player.handleFreeze(0);
+            handleSubmittedSet();
+        } catch(InterruptedException ignored){} 
+    }
+
+    private void handleSubmittedSet() {
+        while(submissionQ.size() != 0) {
+            int playerSubmittedSet = submissionQ.remove();
+            Integer[] setTokens = table.playerSetTokens(playerSubmittedSet);
+            long numOfActualTokens = Arrays.stream(setTokens).filter(Objects::nonNull).count();
+            Player player = players[playerSubmittedSet];
+            if(numOfActualTokens == SET_SIZE) {
+                int[] setTokensConverted = new int[SET_SIZE];
+                for(int i = 0; i < SET_SIZE; i++) {
+                    setTokensConverted[i] = (int)setTokens[i];
                 }
+                boolean isValidSet = env.util.testSet(setTokensConverted);
+                if(isValidSet) {
+                    removeCardsFromTable(setTokensConverted);
+                    placeCardsOnTable();
+                    player.point();
+                    player.handleFreeze(env.config.pointFreezeMillis);
+                    updateTimerDisplay(true);
+                } else {
+                    player.setTokensPlaced((int)numOfActualTokens);
+                    player.handleFreeze(env.config.penaltyFreezeMillis);
+                }    
+            } else {
+                player.handleFreeze(0);
             }
-        } catch(InterruptedException ignored){}
+        }
     }
 
     /**
@@ -192,8 +199,8 @@ public class Dealer implements Runnable {
         if((System.currentTimeMillis() - lastSecond)/SECOND == 1) {
             lastSecond = System.currentTimeMillis(); }
         if(reset || milliseconds < 0) {
-            reshuffleTime = System.currentTimeMillis() + MINUTE;
-            milliseconds = MINUTE;
+            reshuffleTime = System.currentTimeMillis() + turnTimeout;
+            milliseconds = turnTimeout;
         } else if(milliseconds >= 0){
             env.ui.setCountdown(milliseconds, false);
             milliseconds -= SECOND;
