@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.Random;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,4 +71,31 @@ class PlayerTest {
         // check that ui.setScore was called with the player's id and the correct score
         verify(ui).setScore(eq(player.id), eq(expectedScore));
     }
+
+    @Test
+    void removeAllTokens() {
+        player.setTokensPlaced(2);
+
+        int expectedAmountTokens = 0;
+
+        player.removeAllTokens();
+
+        assertEquals(expectedAmountTokens, player.getTokensPlaced());
+    }
+
+    @Test
+    void placeToken() {
+        Random rnd = new Random();
+        int slotNum = rnd.nextInt(12);
+        int tokensBefore = rnd.nextInt(3);
+        player.setTokensPlaced(tokensBefore);
+        
+        int expectedAmountTokens = tokensBefore + 1;
+        
+        player.placeToken(slotNum);
+
+        assertEquals(expectedAmountTokens, player.getTokensPlaced());
+    }
+
+
 }

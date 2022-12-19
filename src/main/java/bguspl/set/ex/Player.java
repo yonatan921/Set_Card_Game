@@ -197,20 +197,24 @@ public class Player implements Runnable {
         }
         else {
             if(tokensPlaced < dealer.SET_SIZE) {
-                tokensPlaced++;
-                table.placeToken(id, slotNum);
-                if(tokensPlaced == dealer.SET_SIZE){
-                    try {
-                        dealer.submitedSet(id);
-                        if(human) {
-                            playerThread.sleep(dealer.turnTimeout);
-                        } else {
-                            aiThread.sleep(dealer.turnTimeout);
-                        }
-                    } catch(InterruptedException ignored) {}
-                    penalty();
-                }
+                placeToken(slotNum);
             }
+        }
+    }
+
+    void placeToken(int slotNum) {
+        tokensPlaced++;
+        table.placeToken(id, slotNum);
+        if(tokensPlaced == dealer.SET_SIZE){
+            try {
+                dealer.submitedSet(id);
+                if(human) {
+                    playerThread.sleep(dealer.turnTimeout);
+                } else {
+                    aiThread.sleep(dealer.turnTimeout);
+                }
+            } catch(InterruptedException ignored) {}
+            penalty();
         }
     }
 
