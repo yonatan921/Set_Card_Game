@@ -44,6 +44,7 @@ class PlayerTest {
     void setUp() {
         // purposely do not find the configuration files (use defaults here).
         Env env = new Env(logger, new Config(logger, ""), ui, util);
+        when(dealer.getSET_SIZE()).thenReturn(3);
         player = new Player(env, dealer, table, 0, false);
         assertInvariants();
     }
@@ -96,6 +97,4 @@ class PlayerTest {
 
         assertEquals(expectedAmountTokens, player.getTokensPlaced());
     }
-
-
 }

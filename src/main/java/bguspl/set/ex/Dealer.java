@@ -55,6 +55,10 @@ public class Dealer implements Runnable {
         return submissionQ;
     }
 
+    public int getSET_SIZE() {
+        return SET_SIZE;
+    }
+
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
         this.table = table;

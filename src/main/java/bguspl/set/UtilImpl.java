@@ -73,6 +73,7 @@ public class UtilImpl implements Util {
 
         for (int i = 0; i < r; ++i)
             combination[i] = i;
+
         while (combination[r - 1] < deck.size()) {
             int[] cards = Arrays.stream(combination).map(deck::get).sorted().toArray();
             if (testSet(cards)) {

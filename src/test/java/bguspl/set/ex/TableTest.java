@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.verify;
+
 @ExtendWith(MockitoExtension.class)
 class TableTest {
 
@@ -148,7 +148,7 @@ class TableTest {
         public void removeToken(int player, int slot) {}
         @Override
         public void announceWinner(int[] players) {}
-    };
+    }
 
     static class MockUtil implements Util {
         @Override

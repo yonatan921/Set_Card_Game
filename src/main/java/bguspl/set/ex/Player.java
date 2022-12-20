@@ -82,7 +82,7 @@ public class Player implements Runnable {
         this.table = table;
         this.id = id;
         this.human = human;
-        queue = new ArrayBlockingQueue<>(dealer.SET_SIZE);
+        queue = new ArrayBlockingQueue<>(dealer.getSET_SIZE());
         tokensPlaced = 0;
         this.dealer = dealer;
         allowedToPlaceTokens = false;
