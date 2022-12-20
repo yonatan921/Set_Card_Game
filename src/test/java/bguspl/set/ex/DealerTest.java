@@ -20,7 +20,6 @@ import static org.mockito.Mockito.when;
 class DealerTest {
 
     private Dealer dealer;
-    private Player[] players;
 
     @Mock
     Player player1;
@@ -42,7 +41,7 @@ class DealerTest {
     @BeforeEach
     void setUp() {
         Env env = new Env(logger, new Config(logger, ""), ui, util);
-        players = new Player[]{player1, player2}; //magic number
+        Player[] players = new Player[]{player1, player2};
         dealer = new Dealer(env, table, players);
 
     }
