@@ -51,6 +51,10 @@ public class Dealer implements Runnable {
 
     public final int SET_SIZE;
 
+    public ArrayBlockingQueue<Integer> getSubmissionQ() {
+        return submissionQ;
+    }
+
     public Dealer(Env env, Table table, Player[] players) {
         this.env = env;
         this.table = table;
@@ -234,13 +238,15 @@ public class Dealer implements Runnable {
     /**
      * Check who is/are the winner/s and displays them.
      */
-    private void announceWinners() {
+     int announceWinners() {
         Optional<Player> winner = Arrays.stream(players).max(Comparator.comparingInt(Player::score));
         if (winner.isPresent()){
             int score = winner.get().score();
             int [] winners = Arrays.stream(players).filter(p -> p.score() == score).mapToInt( x -> x.id).toArray();
             env.ui.announceWinner(winners);
+            return score;
         }
+        return 0;
     }
 
     public void submitedSet(int playerIdSubmitted) {
