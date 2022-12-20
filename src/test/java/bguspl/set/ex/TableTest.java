@@ -9,9 +9,12 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Properties;
+import java.util.Random;
 import java.util.logging.Logger;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
 
 class TableTest {
 
@@ -95,6 +98,29 @@ class TableTest {
         placeSomeCardsAndAssert();
     }
 
+    @Test
+    void removeCard(){
+        fillAllSlots();
+        Random rnd = new Random();
+        int slot = rnd.nextInt(4); // magic number
+
+        table.removeCard(slot);
+
+        Integer expected = null;
+
+        assertEquals(expected, slotToCard[slot]);
+    }
+    @Test
+    void placeToken(){
+        Random rnd = new Random();
+        int player = rnd.nextInt(2); // magic number
+        int slot = rnd.nextInt(4); // magic number
+
+        table.placeToken(player, slot);
+
+        assertTrue(table.getPlayerTokenState(player, slot));
+    }
+
     static class MockUserInterface implements UserInterface {
         @Override
         public void dispose() {}
@@ -152,4 +178,6 @@ class TableTest {
             super("", null);
         }
     }
+
+
 }
