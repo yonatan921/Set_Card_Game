@@ -61,7 +61,7 @@ public class Player implements Runnable {
 
     private final Dealer dealer;
 
-    private boolean allowedToPlaceTokens;
+    private  boolean allowedToPlaceTokens;
 
     private long freezeMillis;
 
@@ -122,7 +122,6 @@ public class Player implements Runnable {
     @Override
     public void run() {
         playerThread = Thread.currentThread();
-        System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
         env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + "starting.");
         if (!human) createArtificialIntelligence();
         while (!terminate) {
@@ -137,7 +136,6 @@ public class Player implements Runnable {
         }
         if (!human) try { aiThread.join(); } catch (InterruptedException ignored) {}
         env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " terminated.");
-        System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
     }
 
     /**
@@ -148,12 +146,10 @@ public class Player implements Runnable {
         // note: this is a very very smart AI (!)
         aiThread = new Thread(() -> {
             env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " starting.");
-            System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
             while (!terminate) {
                 pickRandomSlot();
             }
             playerThread.interrupt();
-            System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
             env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " terminated.");
         }, "computer-" + id);
         aiThread.start();
@@ -240,7 +236,7 @@ public class Player implements Runnable {
         while(freezeMillis > 0) {
             env.ui.setFreeze(id, freezeMillis);
             try {
-                playerThread.sleep(Dealer.SECOND); //MIGHT BE PROBLEMATIC
+                playerThread.sleep(Dealer.SECOND);
             } catch (InterruptedException ignored) {}
             freezeMillis -= Dealer.SECOND;
         }

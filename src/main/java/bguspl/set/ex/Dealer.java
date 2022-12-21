@@ -68,7 +68,7 @@ public class Dealer implements Runnable {
         SET_SIZE = env.config.featureSize;
         reshuffleTime = System.currentTimeMillis() + turnTimeout;
         milliseconds = turnTimeout;
-        submissionQ = new ArrayBlockingQueue<>(100000);
+        submissionQ = new ArrayBlockingQueue<>(1000);
         
     }
 
@@ -78,7 +78,6 @@ public class Dealer implements Runnable {
     @Override
     public void run() {
         dealerThread = Thread.currentThread();
-        System.out.printf("Info: Thread %s starting.%n", Thread.currentThread().getName());
         env.logger.log(Level.INFO, "Thread " + Thread.currentThread().getName() + " starting.");
         for (Player player : players) {
             Thread pThread = new Thread(player, "player" + player.getId());
@@ -94,7 +93,7 @@ public class Dealer implements Runnable {
         terminate();
         announceWinners();
                
-        System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
+        // System.out.printf("Info: Thread %s terminated.%n", Thread.currentThread().getName());
     
         }
 

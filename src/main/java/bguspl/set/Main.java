@@ -76,7 +76,6 @@ public class Main {
         } catch (InterruptedException ignored) {
         } finally {
             logger.severe("thanks for playing... it was fun!");
-            System.out.println("Thanks for playing... it was fun!");
             ThreadLogger.logStop(logger, Thread.currentThread().getName());
             if (!xButtonPressed) env.ui.dispose();
             for (Handler h : logger.getHandlers()) h.flush();
