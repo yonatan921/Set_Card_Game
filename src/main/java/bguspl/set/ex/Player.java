@@ -189,15 +189,17 @@ public class Player implements Runnable {
     }
 
     private void queuePop() {
-        Integer slotNum = queue.remove();
-        boolean tokenStateAtSlot = table.getPlayerTokenState(id, slotNum);
-        if(tokenStateAtSlot) {
-            tokensPlaced--;
-            table.removeToken(id, slotNum);
-        }
-        else {
-            if(tokensPlaced < dealer.SET_SIZE) {
-                placeToken(slotNum);
+        Integer slotNum = queue.poll();
+        if(slotNum != null) {
+            boolean tokenStateAtSlot = table.getPlayerTokenState(id, slotNum);
+            if(tokenStateAtSlot) {
+                tokensPlaced--;
+                table.removeToken(id, slotNum);
+            }
+            else {
+                if(tokensPlaced < dealer.SET_SIZE) {
+                    placeToken(slotNum);
+                }
             }
         }
     }
