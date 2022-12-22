@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="bguspl.set.ex.PlayerTest" time="0.042" tests="3" errors="0" skipped="0" failures="0">
+<testsuite xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://maven.apache.org/surefire/maven-surefire-plugin/xsd/surefire-test-report.xsd" name="bguspl.set.ex.PlayerTest" time="0.024" tests="3" errors="0" skipped="0" failures="0">
   <properties>
     <property name="java.specification.version" value="18"/>
     <property name="sun.cpu.isalist" value="amd64"/>
@@ -16,7 +16,7 @@
     <property name="sun.java.launcher" value="SUN_STANDARD"/>
     <property name="user.country" value="US"/>
     <property name="sun.boot.library.path" value="C:\Users\yonat\.jdks\openjdk-18.0.1.1\bin"/>
-    <property name="sun.java.command" value="C:\Users\yonat\AppData\Local\Temp\surefire14092008998009463566\surefirebooter3569805797660254461.jar C:\Users\yonat\AppData\Local\Temp\surefire14092008998009463566 2022-12-20T23-45-27_091-jvmRun1 surefire16530474504103093918tmp surefire_012170028783779622781tmp"/>
+    <property name="sun.java.command" value="C:\Users\yonat\AppData\Local\Temp\surefire317180535135454689\surefirebooter1979899478219775494.jar C:\Users\yonat\AppData\Local\Temp\surefire317180535135454689 2022-12-21T10-17-26_029-jvmRun1 surefire9226333779691444178tmp surefire_014526203396413370310tmp"/>
     <property name="jdk.debug" value="release"/>
     <property name="surefire.test.class.path" value="C:\Users\yonat\IdeaProjects\Set_Card_Game\target\test-classes;C:\Users\yonat\IdeaProjects\Set_Card_Game\target\classes;C:\Users\yonat\.m2\repository\org\junit\jupiter\junit-jupiter-engine\5.9.1\junit-jupiter-engine-5.9.1.jar;C:\Users\yonat\.m2\repository\org\junit\platform\junit-platform-engine\1.9.1\junit-platform-engine-1.9.1.jar;C:\Users\yonat\.m2\repository\org\opentest4j\opentest4j\1.2.0\opentest4j-1.2.0.jar;C:\Users\yonat\.m2\repository\org\junit\platform\junit-platform-commons\1.9.1\junit-platform-commons-1.9.1.jar;C:\Users\yonat\.m2\repository\org\junit\jupiter\junit-jupiter-api\5.9.1\junit-jupiter-api-5.9.1.jar;C:\Users\yonat\.m2\repository\org\apiguardian\apiguardian-api\1.1.2\apiguardian-api-1.1.2.jar;C:\Users\yonat\.m2\repository\org\mockito\mockito-core\4.9.0\mockito-core-4.9.0.jar;C:\Users\yonat\.m2\repository\net\bytebuddy\byte-buddy\1.12.16\byte-buddy-1.12.16.jar;C:\Users\yonat\.m2\repository\net\bytebuddy\byte-buddy-agent\1.12.16\byte-buddy-agent-1.12.16.jar;C:\Users\yonat\.m2\repository\org\objenesis\objenesis\3.3\objenesis-3.3.jar;C:\Users\yonat\.m2\repository\org\mockito\mockito-junit-jupiter\4.9.0\mockito-junit-jupiter-4.9.0.jar;"/>
     <property name="sun.cpu.endian" value="little"/>
@@ -31,7 +31,7 @@
     <property name="line.separator" value="&#10;"/>
     <property name="java.vm.specification.vendor" value="Oracle Corporation"/>
     <property name="java.specification.name" value="Java Platform API Specification"/>
-    <property name="surefire.real.class.path" value="C:\Users\yonat\AppData\Local\Temp\surefire14092008998009463566\surefirebooter3569805797660254461.jar"/>
+    <property name="surefire.real.class.path" value="C:\Users\yonat\AppData\Local\Temp\surefire317180535135454689\surefirebooter1979899478219775494.jar"/>
     <property name="user.script" value=""/>
     <property name="sun.management.compiler" value="HotSpot 64-Bit Tiered Compilers"/>
     <property name="java.runtime.version" value="18.0.1.1+2-6"/>
@@ -59,7 +59,7 @@
     <property name="sun.io.unicode.encoding" value="UnicodeLittle"/>
     <property name="java.class.version" value="62.0"/>
   </properties>
-  <testcase name="placeToken" classname="bguspl.set.ex.PlayerTest" time="0.015"/>
-  <testcase name="point" classname="bguspl.set.ex.PlayerTest" time="0.023"/>
-  <testcase name="removeAllTokens" classname="bguspl.set.ex.PlayerTest" time="0.002"/>
+  <testcase name="placeToken" classname="bguspl.set.ex.PlayerTest" time="0.005"/>
+  <testcase name="point" classname="bguspl.set.ex.PlayerTest" time="0.015"/>
+  <testcase name="removeAllTokens" classname="bguspl.set.ex.PlayerTest" time="0.003"/>
 </testsuite>

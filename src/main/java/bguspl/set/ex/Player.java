@@ -61,7 +61,7 @@ public class Player implements Runnable {
 
     private final Dealer dealer;
 
-    private  boolean allowedToPlaceTokens;
+    private volatile boolean allowedToPlaceTokens;
 
     private long freezeMillis;
 

@@ -174,7 +174,9 @@ public class Table {
         Integer[] tokensSlots = new Integer[3];
         for(int i = 0, j = 0; i < playersTokens[player].length; i++) {
             if(playersTokens[player][i]) {
-                tokensSlots[j] = slotToCard[i];
+                try {
+                    tokensSlots[j] = slotToCard[i];
+                }catch (ArrayIndexOutOfBoundsException ignored){}
                 j++;
             }
         }

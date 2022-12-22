@@ -34,6 +34,8 @@ public class Dealer implements Runnable {
      */
     private volatile boolean terminate;
 
+    private final int TIMER_OFFSET = 1500;
+
     /**
      * The time when the dealer needs to reshuffle the deck due to turn timeout.
      */
@@ -102,7 +104,7 @@ public class Dealer implements Runnable {
      */
     long lastSecond;
     private void timerLoop() {
-        while (!terminate && System.currentTimeMillis() < reshuffleTime + 1500) { // set reshuffleTime = 60sec
+        while (!terminate && System.currentTimeMillis() < reshuffleTime + TIMER_OFFSET) { // set reshuffleTime = 60sec
             if(milliseconds != turnTimeout) {
                 sleepUntilWokenOrTimeout();
             }
